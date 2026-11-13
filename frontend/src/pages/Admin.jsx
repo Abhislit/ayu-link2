@@ -24,7 +24,7 @@ function valueFor(row, key) {
 export default function Admin() {
   const [overview, setOverview] = useState(null)
   const [directories, setDirectories] = useState({})
-  const [activeSection, setActiveSection] = useState('hospitals')
+  const [activeSection, setActiveSection] = useState('cases')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
