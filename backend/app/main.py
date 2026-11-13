@@ -1,9 +1,12 @@
 import asyncio
 from contextlib import asynccontextmanager
+import os
+from pathlib import Path
 
 import socketio
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy import inspect, text
 
 from app import realtime
@@ -85,7 +88,33 @@ app.include_router(admin.router)
 # remaining scope to Socket.IO and let it dispatch on the Engine.IO query.
 app.mount("/socket.io", socketio.ASGIApp(realtime.sio, socketio_path=None))
 
-
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+if os.getenv("AYU_SERVE_FRONTEND", "false").lower() == "true":
+    frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+    index_file = frontend_dist / "index.html"
+    if not index_file.is_file():
+        raise RuntimeError("AYU_SERVE_FRONTEND is enabled, but frontend/dist/index.html is missing")
+
+    @app.get("/", include_in_schema=False)
+    def frontend_index():
+        return FileResponse(index_file)
+
+    @app.get("/{frontend_path:path}", include_in_schema=False)
+    def frontend_route(frontend_path: str):
+        if (
+            frontend_path == "api"
+            or frontend_path.startswith("api/")
+            or frontend_path == "socket.io"
+            or frontend_path.startswith("socket.io/")
+        ):
+            raise HTTPException(status_code=404)
+        path = (frontend_dist / frontend_path).resolve()
+        try:
+            path.relative_to(frontend_dist.resolve())
+        except ValueError as exc:
+            raise HTTPException(status_code=404) from exc
+        return FileResponse(path if path.is_file() else index_file)

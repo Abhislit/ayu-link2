@@ -1,3 +1,8 @@
+import math
+import struct
+import wave
+from io import BytesIO
+
 from app.database import SessionLocal
 from app.models import User
 from app.security import hash_password
@@ -32,6 +37,21 @@ def upload(client, case_id, headers, file=WEBM, duration="12"):
         data={"duration_seconds": duration},
         headers=headers,
     )
+
+
+def wav_test_tone():
+    sample_rate = 8000
+    samples = (
+        struct.pack("<h", int(12000 * math.sin(2 * math.pi * 440 * i / sample_rate)))
+        for i in range(sample_rate)
+    )
+    output = BytesIO()
+    with wave.open(output, "wb") as audio:
+        audio.setnchannels(1)
+        audio.setsampwidth(2)
+        audio.setframerate(sample_rate)
+        audio.writeframes(b"".join(samples))
+    return output.getvalue()
 
 
 def test_voice_message_uploaded(client):
@@ -75,12 +95,19 @@ def test_voice_duration_over_limit_rejected(client):
 def test_voice_audio_streams_back(client):
     case_id = make_case(client)
     headers = login(client, "driver@ayu.test")
-    message = upload(client, case_id, headers).json()
+    tone = wav_test_tone()
+    message = upload(
+        client,
+        case_id,
+        headers,
+        file=("test-tone.wav", tone, "audio/wav"),
+        duration="1",
+    ).json()
 
     res = client.get(f"/api/cases/{case_id}/messages/{message['id']}/audio", headers=headers)
     assert res.status_code == 200
-    assert res.content == WEBM[1]
-    assert res.headers["content-type"].startswith("audio/webm")
+    assert res.content == tone
+    assert res.headers["content-type"].startswith("audio/wav")
 
 
 def test_voice_requires_auth(client):

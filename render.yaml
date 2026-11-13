@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ayu-link
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: AYU_ENV
+        value: dev
+      - key: AYU_SECRET
+        generateValue: true
+      - key: AYU_DATABASE_URL
+        value: sqlite:///./ayu.db

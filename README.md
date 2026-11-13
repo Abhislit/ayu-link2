@@ -9,11 +9,23 @@ Doctor dashboards.
 This prototype is for demonstration only. It is not a clinically validated or
 production-ready patient-care system.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Abhislit/ayu-link2)
+
 ## Architecture
 
 See the [system architecture and handoff sequence](./docs/architecture.md), or
 use the [one-page workflow diagram](./docs/ayu-link-emergency-flow.svg) in a
 presentation.
+
+## Publish a demo on Render
+
+Use the **Deploy to Render** button above and authorize Render to access this
+public repository. Render reads `render.yaml`, builds the React frontend and
+FastAPI backend into one service, then provides a public `onrender.com` URL.
+The first build may take several minutes. Demo accounts use the password
+`ayu12345`; use synthetic data only. The free service uses temporary local
+storage, so demo cases and voice recordings may be reset when it restarts or
+redeploys.
 
 ## Run locally
 
@@ -127,8 +139,10 @@ flashing instructions.
    scan**. The demo resolves Ravi Kumar's patient details and creates or opens a
    case. Set an emergency category if known.
 3. Select **City General** as the receiving hospital.
-4. Record a voice note, preview it, then send it. Or send a short text update.
-   The browser will request microphone permission when recording begins.
+4. Click **Play test sound** to check speaker output. Record a voice note and
+   check that the microphone meter moves before sending; silent recordings are
+   blocked with a microphone warning. Preview and send the note, or send a text
+   update. The browser requests microphone permission when recording begins.
 5. In another browser session, sign in as `hospital@ayu.test`. The case and
    new communication arrive in the Hospital dashboard; staff can play the
    recording, reply, acknowledge the emergency, and update preparation status.

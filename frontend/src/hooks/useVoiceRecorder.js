@@ -10,18 +10,30 @@ const MIME_TYPES = [
 export default function useVoiceRecorder() {
   const recorder = useRef(null)
   const stream = useRef(null)
+  const analyser = useRef(null)
+  const audioContext = useRef(null)
   const startedAt = useRef(0)
+  const peakLevel = useRef(0)
   const [recording, setRecording] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(0)
   const [blob, setBlob] = useState(null)
+  const [inputLevel, setInputLevel] = useState(0)
+  const [hasAudio, setHasAudio] = useState(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!recording) return undefined
+    const samples = analyser.current ? new Float32Array(analyser.current.fftSize) : null
     const timer = window.setInterval(() => {
       const currentSeconds = Math.floor((Date.now() - startedAt.current) / 1000)
       setElapsed(currentSeconds)
+      if (analyser.current && samples) {
+        analyser.current.getFloatTimeDomainData(samples)
+        const rms = Math.sqrt(samples.reduce((sum, sample) => sum + sample * sample, 0) / samples.length)
+        peakLevel.current = Math.max(peakLevel.current, rms)
+        setInputLevel(rms)
+      }
       if (currentSeconds >= 120 && recorder.current?.state === 'recording') {
         recorder.current.stop()
         setRecording(false)
@@ -34,6 +46,7 @@ export default function useVoiceRecorder() {
     () => () => {
       if (recorder.current?.state === 'recording') recorder.current.stop()
       stream.current?.getTracks().forEach((track) => track.stop())
+      if (audioContext.current?.state !== 'closed') void audioContext.current?.close()
     },
     [],
   )
@@ -43,6 +56,9 @@ export default function useVoiceRecorder() {
     setBlob(null)
     setDuration(0)
     setElapsed(0)
+    setInputLevel(0)
+    setHasAudio(null)
+    peakLevel.current = 0
 
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
       setError('Voice recording is not supported in this browser. You can send a text update instead.')
@@ -52,6 +68,23 @@ export default function useVoiceRecorder() {
     try {
       const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       stream.current = audioStream
+      if (window.AudioContext) {
+        let context
+        try {
+          context = new AudioContext()
+          audioContext.current = context
+          await context.resume()
+          const inputAnalyser = context.createAnalyser()
+          inputAnalyser.fftSize = 512
+          context.createMediaStreamSource(audioStream).connect(inputAnalyser)
+          analyser.current = inputAnalyser
+        } catch {
+          if (context && context.state !== 'closed') void context.close()
+          audioContext.current = null
+          analyser.current = null
+          setError('Microphone input cannot be monitored in this browser. Check the recording preview before sending.')
+        }
+      }
       const mimeType = MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type))
       const activeRecorder = new MediaRecorder(audioStream, mimeType ? { mimeType } : undefined)
       const chunks = []
@@ -71,10 +104,23 @@ export default function useVoiceRecorder() {
         } else {
           setBlob(recordingBlob)
           setDuration(Math.min(recordedSeconds, 120))
+          const capturedAudio = analyser.current
+            ? peakLevel.current >= 0.004
+            : null
+          setHasAudio(capturedAudio)
+          if (capturedAudio === false) {
+            setError('No microphone sound was detected. Check the selected microphone and record again.')
+          }
         }
         setElapsed(Math.min(recordedSeconds, 120))
         audioStream.getTracks().forEach((track) => track.stop())
         stream.current = null
+        analyser.current = null
+        if (audioContext.current?.state !== 'closed') {
+          void audioContext.current?.close()
+        }
+        audioContext.current = null
+        setInputLevel(0)
       }
       startedAt.current = Date.now()
       recorder.current = activeRecorder
@@ -104,6 +150,8 @@ export default function useVoiceRecorder() {
     setBlob(null)
     setDuration(0)
     setElapsed(0)
+    setInputLevel(0)
+    setHasAudio(null)
     setError('')
   }
 
@@ -112,6 +160,8 @@ export default function useVoiceRecorder() {
     elapsed,
     duration,
     blob,
+    inputLevel,
+    hasAudio,
     error,
     supported: Boolean(navigator.mediaDevices?.getUserMedia && window.MediaRecorder),
     start,
