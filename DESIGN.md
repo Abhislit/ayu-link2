@@ -225,9 +225,10 @@ animate. Respect reduced-motion preferences.
 ### Quick Concerns
 
 Offer breathing difficulty, chest discomfort, injury or accident,
-pregnancy-related concern, and other / not sure as clear, selectable message
-drafts. Explain that selecting one does not diagnose or change the emergency
-category.
+pregnancy-related concern, and other / not sure as individually selectable
+message-draft chips. Crews can select multiple concerns and toggle each one off
+again. Explain that these crew-reported selections do not diagnose or change
+the emergency category.
 
 ## Do's and Don'ts
 

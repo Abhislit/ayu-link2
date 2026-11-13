@@ -17,23 +17,68 @@ presentation.
 
 ## Run locally
 
-Install the backend dependencies and start the API and Socket.IO server:
+Download and extract the ZIP, then open the extracted **`ayu-link2` project
+folder** in VS Code (not the ZIP file and not the `frontend` subfolder). This
+app needs both its API server and its frontend; opening `index.html` directly
+or starting only the frontend leaves the patient and hospital data unavailable.
+
+### First-time setup
+
+Install Python 3.11+ and Node.js 20.19+ or 22.12+, then open a VS Code terminal
+in the project root.
+
+**Windows PowerShell:**
 
 ```bash
-pip install -r backend/requirements.txt
-AYU_ENV=dev python3 -m uvicorn app.main:app --app-dir backend --reload
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+cd frontend
+npm install
 ```
 
-In another terminal, start the frontend:
+**macOS / Linux:**
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements.txt
+cd frontend
+npm install
+```
+
+### Start both servers
+
+In VS Code, choose **Terminal → Run Task… → AYU-LINK: Start development
+servers**. It starts the API and frontend in separate terminals. Alternatively,
+run these commands in two VS Code terminals from the project root:
+
+**Windows PowerShell, API:**
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --reload
+```
+
+**macOS / Linux, API:**
+
+```bash
+.venv/bin/python -m uvicorn app.main:app --app-dir backend --reload
+```
+
+**All platforms, frontend (second terminal):**
 
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
 
-Open the Vite URL (usually `http://localhost:5173`). In `AYU_ENV=dev`, the
-backend seeds demo accounts on startup. Password for each account is `ayu12345`:
+If starting the project with Copilot Chat, ask: **“Read the repository
+instructions and README, install any missing dependencies, then run the
+AYU-LINK development servers.”** The checked-in `.github/copilot-instructions.md`
+and VS Code task describe the correct full-stack launch.
+
+Wait until both terminals report that their server is ready, then open
+**http://localhost:5173**. The frontend proxies API and live-update connections
+to the local backend on port 8000. The backend defaults to demo mode and seeds
+demo accounts on startup. Password for each account is `ayu12345`:
 
 | Role | Email |
 |---|---|
@@ -81,6 +126,18 @@ The authenticated simulation endpoint is enabled only in `AYU_ENV=dev` or
 `AYU_ENV=test`; the hardware-compatible `POST /api/rfid/scans` endpoint remains
 available to an ESP32 using its `X-Device-Key`. RFID cards should contain only
 UIDs, never patient data.
+
+### If the page is empty or data does not load
+
+- Check that **both** the API and frontend terminals are still running.
+- Open `http://localhost:8000/api/health`; it should show `{"status":"ok"}`.
+- Keep Vite on port 5173. If the task reports that port 5173 is already in use,
+  stop the other development server and restart AYU-LINK rather than letting
+  Vite silently move to another port.
+- Do not use VS Code Live Server or open the HTML file directly; the Vite
+  development server supplies the API proxy the app needs.
+- Demo logins and patient cases are local to the API's SQLite database. Another
+  computer running its own copy has its own separate demo data.
 
 ## Prototype configuration
 

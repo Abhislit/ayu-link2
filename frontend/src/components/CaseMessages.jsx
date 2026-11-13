@@ -80,7 +80,7 @@ export default function CaseMessages({
 }) {
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
-  const [selectedConcern, setSelectedConcern] = useState('')
+  const [selectedConcerns, setSelectedConcerns] = useState([])
   const [loadedCaseId, setLoadedCaseId] = useState(null)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
@@ -126,7 +126,7 @@ export default function CaseMessages({
         body: { text },
       })
       setText('')
-      setSelectedConcern('')
+      setSelectedConcerns([])
       await loadMessages()
     } catch (reason) {
       setError(reason.message || 'Update could not be sent. Try again.')
@@ -193,16 +193,23 @@ export default function CaseMessages({
           <>
             {quickConcerns.length ? (
               <fieldset className="quick-concerns">
-                <legend>What should the hospital know?</legend>
+                <legend>What should the hospital know? <span className="font-normal text-[var(--paper-muted)]">Select all that apply.</span></legend>
                 <div className="concern-options">
                   {quickConcerns.map((concern) => (
                     <button
                       key={concern}
                       type="button"
-                      aria-pressed={selectedConcern === concern}
+                      aria-pressed={selectedConcerns.includes(concern)}
                       onClick={() => {
-                        setSelectedConcern(concern)
-                        setText(`Crew-reported concern: ${concern}.`)
+                        const nextConcerns = selectedConcerns.includes(concern)
+                          ? selectedConcerns.filter((selected) => selected !== concern)
+                          : [...selectedConcerns, concern]
+                        setSelectedConcerns(nextConcerns)
+                        setText(
+                          nextConcerns.length
+                            ? `Crew-reported concerns: ${nextConcerns.join('; ')}.`
+                            : '',
+                        )
                       }}
                       className="concern-option"
                     >
@@ -211,7 +218,7 @@ export default function CaseMessages({
                   ))}
                 </div>
                 <p className="quick-concerns-help">
-                  Selecting an option drafts a message only. It does not diagnose or change the emergency category.
+                  Selected concerns are added to an editable message draft. They do not diagnose or change the emergency category.
                 </p>
               </fieldset>
             ) : null}

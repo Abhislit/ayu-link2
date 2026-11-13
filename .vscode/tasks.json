@@ -1,0 +1,86 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AYU-LINK: Start API",
+      "type": "process",
+      "command": ".venv/bin/python",
+      "windows": {
+        "command": ".venv\\Scripts\\python.exe"
+      },
+      "args": [
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--app-dir",
+        "backend",
+        "--reload"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Started server process|Will watch for changes",
+          "endsPattern": "Uvicorn running on"
+        }
+      },
+      "presentation": {
+        "group": "ayu-link",
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "AYU-LINK: Start frontend",
+      "type": "process",
+      "command": "npm",
+      "windows": {
+        "command": "npm.cmd"
+      },
+      "args": [
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE v.* ready",
+          "endsPattern": "http://127\\.0\\.0\\.1:5173/"
+        }
+      },
+      "presentation": {
+        "group": "ayu-link",
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "AYU-LINK: Start development servers",
+      "dependsOn": [
+        "AYU-LINK: Start API",
+        "AYU-LINK: Start frontend"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}

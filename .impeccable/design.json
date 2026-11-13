@@ -181,6 +181,13 @@
       "description": "Four text-labeled case stages with a state-aware route marker.",
       "html": "<ol class=\"ds-progress\" aria-label=\"Handoff progress\"><li class=\"is-complete\"><span>Patient identified</span></li><li class=\"is-current\" aria-current=\"step\"><span>Hospital selected</span></li><li><span>Hospital acknowledged</span></li><li><span>Case closed</span></li></ol>",
       "css": ".ds-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; } .ds-progress li { position: relative; display: grid; justify-items: center; gap: 8px; color: #526e71; font: 600 11px/1.3 var(--font-mono); text-align: center; } .ds-progress li::before { width: 16px; height: 16px; border: 2px solid #98b3ac; border-radius: 50%; background: #fff; content: ''; } .ds-progress li.is-complete::before { border-color: var(--route); background: var(--route); } .ds-progress li.is-current::before { border: 5px solid var(--route); box-shadow: 0 0 0 4px var(--route-soft); } @media (prefers-reduced-motion: reduce) { .ds-progress * { animation: none !important; transition: none !important; } }"
+    },
+    {
+      "name": "Quick Concern Toggle",
+      "kind": "chip",
+      "description": "Independently toggle multiple crew-reported concerns into an editable message draft.",
+      "html": "<button class=\"ds-concern\" type=\"button\" aria-pressed=\"true\">Breathing difficulty</button><button class=\"ds-concern\" type=\"button\" aria-pressed=\"false\">Chest discomfort</button>",
+      "css": ".ds-concern { min-height: 38px; padding: 0.55rem 0.7rem; border: 1px solid #bdcfca; border-radius: 8px; background: #fff; color: #25494d; font: 600 12px var(--font-mono); transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease; } .ds-concern:hover { border-color: #6ea99a; background: #f3faf7; } .ds-concern[aria-pressed='true'] { border-color: var(--route); background: var(--route-soft); color: #124e46; } .ds-concern:focus-visible { outline: 3px solid #2b8a7b; outline-offset: 3px; }"
     }
   ],
   "narrative": {
@@ -214,7 +221,8 @@
       "Do keep color-coded states legible by text and shape.",
       "Do keep the four operational roles and their existing access boundaries.",
       "Do animate only genuine state changes and honor reduced-motion settings.",
-      "Do make concern drafts editable before the crew sends them."
+      "Do make concern drafts editable before the crew sends them.",
+      "Do let crews select multiple concern chips and toggle each one independently."
     ],
     "donts": [
       "Don't use a concern shortcut as a diagnosis or emergency-category update.",
