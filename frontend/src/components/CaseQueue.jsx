@@ -33,6 +33,7 @@ export default function CaseQueue({
               key={item.id}
               onClick={() => onSelect(item.id)}
               aria-current={String(selectedId) === String(item.id) ? 'true' : undefined}
+              aria-label={`View ${item.patient?.name ?? 'patient'} and ambulance handoff details`}
               className="rack-row"
             >
               <span className="rack-bay">{String(index + 1).padStart(2, '0')}</span>
@@ -47,6 +48,9 @@ export default function CaseQueue({
                   <StatusPill status={item.priority} label={`${item.priority} priority`} />
                   <StatusPill status={item.emergency_category} label={item.emergency_category ?? 'unknown'} />
                   <StatusPill status={item.status} />
+                </span>
+                <span className="mt-1.5 block text-[10px] font-semibold text-[var(--route)]">
+                  {String(selectedId) === String(item.id) ? 'Patient and handoff details open' : 'View patient and handoff details'}
                 </span>
               </span>
               <Icon name="chevron" className="h-4 w-4 shrink-0 text-[var(--paper-muted)]" />
