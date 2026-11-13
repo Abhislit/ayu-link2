@@ -52,15 +52,14 @@ export default function Admin() {
       <header className="dashboard-hero rounded-[28px] p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary-ink)]">Administration</p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Platform overview</h1>
+            <h1 className="display text-3xl text-[var(--ink)]">Platform overview</h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-600">View demo directory and platform totals. Clinical records are not shown here.</p>
           </div>
           <button
             type="button"
             onClick={load}
             disabled={loading}
-            className="primary-button inline-flex min-h-10 items-center justify-center rounded-full px-4 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
+            className="primary-button disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Refreshing…' : 'Refresh'}
           </button>
@@ -81,7 +80,7 @@ export default function Admin() {
             ['Patients', overview.patients],
             ['Emergency cases', overview.cases],
           ].map(([label, count]) => (
-            <div key={label} className="metric-card rounded-[24px] px-4 py-4">
+            <div key={label} className="metric-card px-4 py-4">
               <p className="text-sm font-medium text-slate-600">{label}</p>
               <p className="mt-2 text-2xl font-black tabular-nums text-slate-950">{count}</p>
             </div>
@@ -90,7 +89,7 @@ export default function Admin() {
       ) : null}
 
       <section className="dashboard-panel table-shell overflow-hidden rounded-[28px]">
-        <div className="border-b border-slate-200/80 bg-slate-50/80 px-4 pt-4 sm:px-5">
+        <div className="border-b border-[var(--paper-line)] bg-[var(--paper-band)] px-4 pt-4 sm:px-5">
           <h2 className="text-base font-bold text-slate-950">Directory</h2>
           <div className="mt-3 flex gap-1 overflow-x-auto" role="tablist" aria-label="Admin directories">
             {SECTIONS.map((section) => (
@@ -100,9 +99,7 @@ export default function Admin() {
                 role="tab"
                 aria-selected={activeSection === section.key}
                 onClick={() => setActiveSection(section.key)}
-                className={`shrink-0 rounded-t-xl px-3 py-2 text-sm font-semibold capitalize transition-colors ${
-                  activeSection === section.key ? 'bg-[var(--primary-soft)] text-[var(--primary-ink)] ring-1 ring-inset ring-[#99f6e4]' : 'text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`directory-tab shrink-0 ${activeSection === section.key ? 'active' : ''}`}
               >
                 {section.label}
               </button>

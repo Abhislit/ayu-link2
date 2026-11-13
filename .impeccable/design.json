@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-13T06:32:08Z",
+  "title": "Design System: AYU-LINK",
+  "extensions": {
+    "colorMeta": {
+      "board": {
+        "role": "neutral",
+        "displayName": "Pale Green-Gray",
+        "canonical": "#f3f7f5",
+        "tonalRamp": [
+          "oklch(15% 0.002 165.0)",
+          "oklch(25% 0.004 165.0)",
+          "oklch(35% 0.005 165.0)",
+          "oklch(45% 0.005 165.0)",
+          "oklch(56% 0.005 165.0)",
+          "oklch(67% 0.005 165.0)",
+          "oklch(79% 0.003 165.0)",
+          "oklch(93% 0.001 165.0)"
+        ]
+      },
+      "board-deep": {
+        "role": "primary",
+        "displayName": "Deep Teal",
+        "canonical": "#123a43",
+        "tonalRamp": [
+          "oklch(15% 0.022 215.3)",
+          "oklch(25% 0.037 215.3)",
+          "oklch(35% 0.047 215.3)",
+          "oklch(45% 0.047 215.3)",
+          "oklch(56% 0.047 215.3)",
+          "oklch(67% 0.047 215.3)",
+          "oklch(79% 0.031 215.3)",
+          "oklch(93% 0.010 215.3)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "White Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(45% 0.000 89.9)",
+          "oklch(56% 0.000 89.9)",
+          "oklch(67% 0.000 89.9)",
+          "oklch(79% 0.000 89.9)",
+          "oklch(93% 0.000 89.9)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Teal Ink",
+        "canonical": "#18383e",
+        "tonalRamp": [
+          "oklch(15% 0.019 211.4)",
+          "oklch(25% 0.031 211.4)",
+          "oklch(35% 0.039 211.4)",
+          "oklch(45% 0.039 211.4)",
+          "oklch(56% 0.039 211.4)",
+          "oklch(67% 0.039 211.4)",
+          "oklch(79% 0.026 211.4)",
+          "oklch(93% 0.009 211.4)"
+        ]
+      },
+      "route": {
+        "role": "primary",
+        "displayName": "Wayfinding Jade",
+        "canonical": "#16796d",
+        "tonalRamp": [
+          "oklch(15% 0.026 182.4)",
+          "oklch(25% 0.044 182.4)",
+          "oklch(35% 0.062 182.4)",
+          "oklch(45% 0.080 182.4)",
+          "oklch(56% 0.087 182.4)",
+          "oklch(67% 0.087 182.4)",
+          "oklch(79% 0.059 182.4)",
+          "oklch(93% 0.020 182.4)"
+        ]
+      },
+      "alarm": {
+        "role": "tertiary",
+        "displayName": "Clinical Alert Red",
+        "canonical": "#b43e35",
+        "tonalRamp": [
+          "oklch(15% 0.060 27.9)",
+          "oklch(25% 0.102 27.9)",
+          "oklch(35% 0.143 27.9)",
+          "oklch(45% 0.155 27.9)",
+          "oklch(56% 0.155 27.9)",
+          "oklch(67% 0.155 27.9)",
+          "oklch(79% 0.104 27.9)",
+          "oklch(93% 0.035 27.9)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Atkinson Hyperlegible Next Display",
+        "purpose": "Page titles and patient names."
+      },
+      "body": {
+        "displayName": "Atkinson Hyperlegible Next",
+        "purpose": "Instructions, communication, and case details."
+      },
+      "label": {
+        "displayName": "Atkinson Hyperlegible Next Labels",
+        "purpose": "Compact field labels and status context."
+      }
+    },
+    "shadows": [
+      {
+        "name": "work-surface-lift",
+        "value": "0 12px 30px -20px rgba(18, 58, 67, 0.32)",
+        "purpose": "Separate cards from the pale app background without heavy elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "handoff-step-advance",
+        "value": "620ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Acknowledge a real case-state transition; never animate initial loading or case switching."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-navigation",
+        "value": "920px"
+      },
+      {
+        "name": "compact-content",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Confident jade action for the next handoff step.",
+      "html": "<button class=\"ds-button-primary\">Send update</button>",
+      "css": ".ds-button-primary { min-height: 42px; padding: 0.7rem 1rem; border: 1px solid var(--route); border-radius: 8px; background: var(--route); color: #fff; font: 700 14px/1.2 var(--font-display); transition: background-color 160ms ease, border-color 160ms ease; } .ds-button-primary:hover { border-color: #105e55; background: #105e55; } .ds-button-primary:focus-visible { outline: 3px solid #2b8a7b; outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "High-contrast field with an explicit keyboard-focus state.",
+      "html": "<input class=\"ds-input\" aria-label=\"RFID card UID\" placeholder=\"Enter card UID\" />",
+      "css": ".ds-input { width: 100%; min-height: 42px; padding: 0.65rem 0.75rem; border: 1px solid #bacdc7; border-radius: 8px; background: var(--paper); color: var(--ink); font: 400 14px var(--font-mono); } .ds-input:focus-visible { border-color: var(--route); outline: 2px solid #a7d6ca; outline-offset: 1px; }"
+    },
+    {
+      "name": "Active Navigation",
+      "kind": "nav",
+      "refersTo": "active-navigation",
+      "description": "Pale-jade active role in the deep-teal navigation shell.",
+      "html": "<a class=\"ds-nav-active\" href=\"#\">Ambulance</a>",
+      "css": ".ds-nav-active { display: inline-flex; min-height: 44px; align-items: center; padding: 0 11px; border-radius: 8px; background: var(--route-soft); color: var(--board-deep); font: 700 14px var(--font-display); text-decoration: none; } .ds-nav-active:focus-visible { outline: 3px solid #a7d6ca; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "Readable state label paired with a restrained tint.",
+      "html": "<span class=\"ds-chip\">Hospital selected</span>",
+      "css": ".ds-chip { display: inline-flex; min-height: 22px; align-items: center; padding: 0.28rem 0.5rem; border: 1px solid #abd4c5; border-radius: 6px; background: #eaf6f0; color: #205a49; font: 600 11px/1 var(--font-mono); }"
+    },
+    {
+      "name": "Work Surface",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White handoff panel with fine border and quiet lift.",
+      "html": "<article class=\"ds-card\"><strong>Patient identification</strong><p>Scan the patient RFID card.</p></article>",
+      "css": ".ds-card { padding: 20px; border: 1px solid var(--paper-line); border-radius: 14px; background: var(--paper); color: var(--ink); box-shadow: var(--shadow-strip); font: 400 14px/1.5 var(--font-mono); } .ds-card p { margin: 8px 0 0; color: var(--text-muted); }"
+    },
+    {
+      "name": "Handoff Progress",
+      "kind": "custom",
+      "description": "Four text-labeled case stages with a state-aware route marker.",
+      "html": "<ol class=\"ds-progress\" aria-label=\"Handoff progress\"><li class=\"is-complete\"><span>Patient identified</span></li><li class=\"is-current\" aria-current=\"step\"><span>Hospital selected</span></li><li><span>Hospital acknowledged</span></li><li><span>Case closed</span></li></ol>",
+      "css": ".ds-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; } .ds-progress li { position: relative; display: grid; justify-items: center; gap: 8px; color: #526e71; font: 600 11px/1.3 var(--font-mono); text-align: center; } .ds-progress li::before { width: 16px; height: 16px; border: 2px solid #98b3ac; border-radius: 50%; background: #fff; content: ''; } .ds-progress li.is-complete::before { border-color: var(--route); background: var(--route); } .ds-progress li.is-current::before { border: 5px solid var(--route); box-shadow: 0 0 0 4px var(--route-soft); } @media (prefers-reduced-motion: reduce) { .ds-progress * { animation: none !important; transition: none !important; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Hospital Wayfinding",
+    "overview": "AYU-LINK is a calm, high-contrast workspace for the ambulance-to-hospital handoff. Its deep-teal navigation rail anchors warm-white work surfaces, while concise labels and a humanist typeface keep patient and case information easy to scan in a moving ambulance or at a hospital desk.\n\nThe interface makes the next handoff step visible without implying a diagnosis, geographic route, travel time, or clinical certainty. Motion is reserved for a real change in handoff state. The same visual language carries across the ambulance, hospital, doctor, and administrator workspaces.",
+    "keyCharacteristics": [
+      "High-contrast, humanist, and operationally calm.",
+      "Patient identity and the next handoff action stay prominent.",
+      "Status always uses readable labels as well as color.",
+      "Quick concerns draft crew-reported messages; they do not diagnose or change the emergency category."
+    ],
+    "rules": [
+      {
+        "name": "The Concern-Is-Not-Diagnosis Rule",
+        "body": "Concern shortcuts create editable, crew-reported message drafts and never set the emergency category.",
+        "section": "components"
+      },
+      {
+        "name": "The No-Fabricated-Route Rule",
+        "body": "Handoff progress describes case states only; it does not imply a map, distance, location, or ETA.",
+        "section": "layout"
+      },
+      {
+        "name": "The One-Family Rule",
+        "body": "Keep all interface text in Atkinson Hyperlegible Next; use weight and size, not a second typeface, to establish hierarchy.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Do put patient identity, case state, and the next action in the scan path.",
+      "Do keep color-coded states legible by text and shape.",
+      "Do keep the four operational roles and their existing access boundaries.",
+      "Do animate only genuine state changes and honor reduced-motion settings.",
+      "Do make concern drafts editable before the crew sends them."
+    ],
+    "donts": [
+      "Don't use a concern shortcut as a diagnosis or emergency-category update.",
+      "Don't invent a location, map, distance, ETA, or clinical claim.",
+      "Don't use red as a general accent or decorate the interface with control-room imagery.",
+      "Don't hide important controls behind hover-only behavior."
+    ]
+  }
+}

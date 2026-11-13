@@ -5,68 +5,71 @@ export function PatientOverview({ detail, compact = false }) {
   if (!detail?.patient) return null
   const { patient, medical_record: record } = detail
   return (
-    <section className="rounded-2xl bg-white p-4 ring-1 ring-inset ring-slate-200 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-slate-950">{patient.name}</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            {patient.age ? `${patient.age} years` : 'Age unavailable'}
-            {patient.sex ? ` · ${patient.sex}` : ''}
-            {patient.blood_group ? ` · ${patient.blood_group}` : ''}
-          </p>
+    <section className="strip">
+      <div className="strip-body">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="paper-label">Patient</p>
+            <h2 className="display mt-1 text-[28px] leading-none text-[var(--ink)]">{patient.name}</h2>
+            <p className="mt-1.5 text-[12px] text-[var(--paper-muted)]">
+              {patient.age ? `${patient.age} years` : 'Age unavailable'}
+              {patient.sex ? ` · ${patient.sex}` : ''}
+              {patient.blood_group ? ` · ${patient.blood_group}` : ''}
+            </p>
+          </div>
+          <StatusPill
+            status={detail.case?.priority ?? 'unknown'}
+            label={`${detail.case?.priority ?? 'Unknown'} priority`}
+          />
         </div>
-        <div className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-800">
-          <Icon name="alert" className="h-4 w-4" />
-          Emergency patient
-        </div>
-      </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-red-50/80 p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-red-900">Allergies</p>
-          <p className="mt-1 text-sm font-medium text-red-950">{patient.allergies || 'None recorded'}</p>
+        <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+          <div className="border border-[#b43e3540] bg-[var(--alarm-tint)] p-2.5">
+            <p className="paper-label text-[var(--alarm)]">Allergies</p>
+            <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.allergies || 'None recorded'}</p>
+          </div>
+          <div className="border border-[var(--paper-line)] bg-[var(--paper-band)] p-2.5">
+            <p className="paper-label">Known conditions</p>
+            <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.conditions || 'None recorded'}</p>
+          </div>
         </div>
-        <div className="rounded-xl bg-amber-50/80 p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-950">Known conditions</p>
-          <p className="mt-1 text-sm font-medium text-amber-950">{patient.conditions || 'None recorded'}</p>
-        </div>
-      </div>
 
-      {patient.aadhaar || patient.phone || patient.emergency_contact || patient.address ? (
-        <div className="mt-3 grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Aadhaar</p>
-            <p className="mt-1 text-sm font-medium text-slate-900">{patient.aadhaar || 'Not recorded'}</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Phone</p>
-            <p className="mt-1 text-sm font-medium text-slate-900">{patient.phone || 'Not recorded'}</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Emergency contact</p>
-            <p className="mt-1 text-sm font-medium text-slate-900">{patient.emergency_contact || 'Not recorded'}</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Address</p>
-            <p className="mt-1 text-sm font-medium text-slate-900">{patient.address || 'Not recorded'}</p>
-          </div>
-        </div>
-      ) : null}
-
-      {!compact ? (
-        <div className="mt-4 border-t border-slate-200 pt-3">
-          <h3 className="text-sm font-semibold text-slate-900">Available medical history</h3>
-          {record ? (
-            <div className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-              {record.summary ? <p>{record.summary}</p> : null}
-              {record.medications ? <p><span className="font-semibold text-slate-800">Medications:</span> {record.medications}</p> : null}
-              {record.notes ? <p>{record.notes}</p> : null}
+        {patient.aadhaar || patient.phone || patient.emergency_contact || patient.address ? (
+          <div className="mt-2.5 grid gap-x-3 gap-y-2.5 border border-[var(--paper-line)] bg-white p-3 sm:grid-cols-2">
+            <div>
+              <p className="paper-label">Aadhaar</p>
+              <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.aadhaar || 'Not recorded'}</p>
             </div>
-          ) : (
-            <p className="mt-1 text-sm text-slate-600">No additional medical record is available.</p>
-          )}
-        </div>
-      ) : null}
+            <div>
+              <p className="paper-label">Phone</p>
+              <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.phone || 'Not recorded'}</p>
+            </div>
+            <div>
+              <p className="paper-label">Emergency contact</p>
+              <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.emergency_contact || 'Not recorded'}</p>
+            </div>
+            <div>
+              <p className="paper-label">Address</p>
+              <p className="mt-1 text-[13px] font-medium text-[var(--ink)]">{patient.address || 'Not recorded'}</p>
+            </div>
+          </div>
+        ) : null}
+
+        {!compact ? (
+          <div className="mt-4 border-t border-dashed border-[var(--perf)] pt-3">
+            <p className="paper-label">Available medical history</p>
+            {record ? (
+              <div className="mt-1.5 space-y-1 text-[13px] leading-6 text-[var(--ink)]">
+                {record.summary ? <p>{record.summary}</p> : null}
+                {record.medications ? <p><span className="font-semibold">Medications:</span> {record.medications}</p> : null}
+                {record.notes ? <p>{record.notes}</p> : null}
+              </div>
+            ) : (
+              <p className="mt-1 text-[13px] text-[var(--paper-muted)]">No additional medical record is available.</p>
+            )}
+          </div>
+        ) : null}
+      </div>
     </section>
   )
 }
@@ -91,32 +94,32 @@ export function CaseStatus({ detail }) {
 }
 
 const PROGRESS_STEPS = [
-  ['open', 'Identified'],
-  ['hospital_selected', 'Hospital'],
-  ['acknowledged', 'Acknowledged'],
-  ['closed', 'Closed'],
+  ['open', 'Patient identified'],
+  ['hospital_selected', 'Hospital selected'],
+  ['acknowledged', 'Hospital acknowledged'],
+  ['closed', 'Case closed'],
 ]
 
-export function CaseProgress({ detail }) {
+export function CaseProgress({ detail, advancing = false }) {
   const status = detail?.case?.status
   if (!status) return null
   const current = Math.max(0, PROGRESS_STEPS.findIndex(([key]) => key === status))
   return (
-    <div>
-      <p className="text-xs font-bold uppercase tracking-wide text-slate-600">Handoff progress</p>
-      <ol className="mt-2 grid grid-cols-4 gap-2">
+    <div className={`handoff-progress${advancing ? ' is-advancing' : ''}`}>
+      <p className="paper-label">Handoff progress</p>
+      <ol className="handoff-progress-list">
         {PROGRESS_STEPS.map(([key, label], index) => {
           const state = index < current ? 'done' : index === current ? 'current' : 'future'
           return (
-            <li key={key} aria-current={index === current ? 'step' : undefined}>
-              <span
-                className={`block h-1.5 rounded-full ${
-                  state === 'done' ? 'bg-emerald-500' : state === 'current' ? 'bg-[var(--primary)]' : 'bg-slate-200'
-                }`}
-              />
-              <span className={`mt-1.5 block text-[10px] font-semibold leading-tight sm:text-xs ${state === 'future' ? 'text-slate-500' : 'text-slate-800'}`}>
-                {label}
+            <li
+              key={key}
+              className={`handoff-step${state === 'done' ? ' is-complete' : ''}${state === 'current' ? ' is-current' : ''}`}
+              aria-current={index === current ? 'step' : undefined}
+            >
+              <span className="handoff-stop" aria-hidden="true">
+                {state === 'done' ? <Icon name="check" className="h-3 w-3" /> : null}
               </span>
+              <span>{label}</span>
             </li>
           )
         })}
@@ -127,12 +130,9 @@ export function CaseProgress({ detail }) {
 
 export function EmptyCase({ title = 'No active emergency case', description, children }) {
   return (
-    <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-600">
-        <Icon name="activity" className="h-6 w-6" />
-      </div>
-      <h2 className="mt-4 text-lg font-bold text-slate-900">{title}</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">{description}</p>
+    <section className="empty-state">
+      <h2>{title}</h2>
+      <p>{description}</p>
       {children ? <div className="mt-5">{children}</div> : null}
     </section>
   )

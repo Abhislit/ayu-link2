@@ -6,21 +6,29 @@ import { CaseProgress, CaseStatus, EmptyCase, PatientOverview } from '../compone
 import Icon from '../components/Icons'
 import { ErrorNotice, LiveStatus, StatusPill } from '../components/StatusPill'
 import useRealtime from '../hooks/useRealtime'
+import { useStripAdvance } from '../hooks/useStripAdvance'
 
 function PageHeader({ connected }) {
   return (
-    <header className="dashboard-hero rounded-[28px] p-5 sm:p-6">
+    <header className="page-heading">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary-ink)]">Ambulance response</p>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Emergency command</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">Identify the patient and keep the receiving team informed in real time.</p>
+          <h1>Ambulance handoff</h1>
+          <p>Identify the patient, share a crew-reported concern, and keep the receiving team informed.</p>
         </div>
         <LiveStatus connected={connected} />
       </div>
     </header>
   )
 }
+
+const QUICK_CONCERNS = [
+  'Breathing difficulty',
+  'Chest discomfort',
+  'Injury or accident',
+  'Pregnancy-related concern',
+  'Other / not sure',
+]
 
 export default function Ambulance() {
   const { user } = useAuth()
@@ -68,6 +76,7 @@ export default function Ambulance() {
     [detail?.case?.id, refreshCurrentCase, user.ambulance_id],
   )
   const connected = useRealtime(handleRealtime)
+  const advancing = useStripAdvance(detail?.case?.id, detail?.case?.status)
 
   useEffect(() => {
     let active = true
@@ -178,9 +187,9 @@ export default function Ambulance() {
   if (loading) {
     return (
       <div className="space-y-5" aria-label="Loading ambulance dashboard">
-        <div className="h-16 animate-pulse rounded-2xl bg-slate-200" />
-        <div className="h-40 animate-pulse rounded-2xl bg-slate-200" />
-        <div className="h-72 animate-pulse rounded-2xl bg-slate-200" />
+        <div className="skeleton h-16" />
+        <div className="skeleton h-40" />
+        <div className="skeleton h-72" />
       </div>
     )
   }
@@ -190,25 +199,20 @@ export default function Ambulance() {
       <PageHeader connected={connected} />
       {error ? <ErrorNotice onDismiss={() => setError('')}>{error}</ErrorNotice> : null}
       {notice ? (
-        <div role="status" className="notice-banner rounded-2xl px-4 py-3 text-sm font-medium text-emerald-900">
+        <div role="status" className="notice">
           {notice}
         </div>
       ) : null}
 
-      <section className="dashboard-panel rounded-[28px] bg-slate-900 p-4 text-white sm:p-5">
+      <section className="strip p-4 sm:p-5">
         <div className="flex items-start gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/10">
-            <Icon name="radio" className="h-5 w-5" />
-          </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h2 className="text-base font-bold">Patient identification</h2>
-                <p className="mt-1 text-sm text-slate-300">RFID scan status · demo scanner</p>
+                <h2 className="text-[15px] font-semibold text-[var(--text)]">Patient identification</h2>
+                <p className="mt-1 text-[12px] text-[var(--text-muted)]">RFID scan · demo scanner</p>
               </div>
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-100 ring-1 ring-white/15">
-                Authenticated · {user.name}
-              </span>
+              <span className="st text-[var(--text-muted)]">Authenticated · {user.name}</span>
             </div>
             <form onSubmit={simulateScan} className="mt-4 flex flex-col gap-2 sm:flex-row">
               <label className="sr-only" htmlFor="rfid-uid">RFID card UID</label>
@@ -218,18 +222,17 @@ export default function Ambulance() {
                 onChange={(event) => setUid(event.target.value)}
                 maxLength={64}
                 placeholder="Enter RFID card UID"
-                className="min-h-12 min-w-0 flex-1 rounded-2xl border border-white/15 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[#99f6e4]"
+                className="field-dark min-h-12 min-w-0 flex-1"
               />
-              <button
-                type="submit"
-                disabled={!uid.trim() || scanning}
-                className="primary-button inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
-              >
+              <button type="submit" disabled={!uid.trim() || scanning} className="btn min-h-12 px-5">
                 <Icon name="radio" className="h-4 w-4" />
                 {scanning ? 'Reading card…' : 'Simulate RFID scan'}
               </button>
             </form>
-            <p className="mt-2 text-xs leading-5 text-slate-300">Presentation mode: enter <span className="font-semibold text-white">CARD-1001</span>. The production device API keeps its own device-key authentication.</p>
+            <p className="mt-2 text-[11px] leading-5 text-[var(--text-muted)]">
+              Presentation mode: enter <span className="text-[var(--text)]">CARD-1001</span>. The production device API keeps
+              its own device-key authentication.
+            </p>
           </div>
         </div>
       </section>
@@ -243,106 +246,158 @@ export default function Ambulance() {
         <>
           <section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div className="space-y-4">
-              <section className="rounded-2xl bg-white p-4 ring-1 ring-inset ring-slate-200 sm:p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-base font-bold text-slate-950">Emergency case #{detail.case.id}</h2>
-                    <p className="mt-1 text-sm text-slate-600">Ambulance {detail.ambulance?.vehicle_number ?? 'assigned'}</p>
+              <section className="strip overflow-hidden">
+                <div className="strip-head">
+                  <div className="flex items-center gap-2">
+                    <span className="paper-label">Case</span>
+                    <span className="font-mono text-[12px] font-semibold text-[var(--ink)]">#{detail.case.id}</span>
+                    <span className="text-[var(--perf)]">·</span>
+                    <span className="paper-label">{detail.ambulance?.vehicle_number ?? 'assigned'}</span>
                   </div>
                   <StatusPill status={detail.case.priority} label={`${detail.case.priority} priority`} />
                 </div>
-                <div className="mt-4"><CaseProgress detail={detail} /></div>
-                <div className="mt-4"><CaseStatus detail={detail} /></div>
-                <div className="mt-4">
-                  <label htmlFor="emergency-category" className="text-sm font-semibold text-slate-800">Emergency category</label>
-                  <select
-                    id="emergency-category"
-                    value={detail.case.emergency_category}
-                    onChange={updateCategory}
-                    disabled={savingCategory}
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[#ccfbf1] disabled:opacity-60"
-                  >
-                    <option value="unknown">Not yet classified</option>
-                    <option value="trauma">Trauma / accident</option>
-                    <option value="cardiac">Cardiac</option>
-                    <option value="respiratory">Respiratory</option>
-                    <option value="obstetric">Obstetric</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-600">Ambulance movement</p>
-                    <p className="mt-1 text-sm font-semibold capitalize text-slate-900">{detail.case.ambulance_status?.replaceAll('_', ' ') ?? 'status unavailable'}</p>
+                <div className="strip-body space-y-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="display text-[30px] leading-none text-[var(--ink)]">{detail.patient.name}</h2>
+                      <p className="mt-1.5 text-[12px] text-[var(--paper-muted)]">
+                        {detail.patient.age} years · {detail.patient.sex} · {detail.patient.blood_group}
+                      </p>
+                    </div>
+                    <StatusPill
+                      status={detail.case.emergency_category}
+                      label={`Category: ${detail.case.emergency_category ?? 'unknown'}`}
+                    />
                   </div>
-                  <button
-                    type="button"
-                    onClick={toggleAmbulanceStatus}
-                    className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
-                  >
-                    Mark {detail.case.ambulance_status === 'arrived' ? 'en route' : 'arrived'}
-                  </button>
+                  {detail.patient.allergies ? (
+                    <p className="border border-[#b43e3540] bg-[var(--alarm-tint)] px-2.5 py-1.5 text-[12px] font-medium text-[#8e2d27]">
+                      Allergies · {detail.patient.allergies}
+                    </p>
+                  ) : null}
+                  <p className="text-[12px] text-[var(--paper-muted)]">
+                    {detail.hospital ? `Receiving · ${detail.hospital.name}` : 'No receiving hospital selected yet'}
+                  </p>
+                  <CaseStatus detail={detail} />
+                  <div className="border-t border-dashed border-[var(--perf)] pt-3">
+                    <CaseProgress detail={detail} advancing={advancing} />
+                  </div>
                 </div>
-                <form onSubmit={assignHospital} className="mt-5 space-y-2 border-t border-slate-200 pt-4">
-                  <label htmlFor="hospital-select" className="text-sm font-semibold text-slate-800">Receiving hospital</label>
-                  <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="stamp px-[30px] py-2">
+                  <p className="stamp-line">
+                    Handoff state · {detail.case.status?.replaceAll('_', ' ')} · ambulance{' '}
+                    {detail.case.ambulance_status?.replaceAll('_', ' ') ?? 'unknown'}
+                  </p>
+                </div>
+              </section>
+
+              <section className="strip">
+                <div className="strip-body space-y-4">
+                  <h3>Response controls</h3>
+                  <div>
+                    <label htmlFor="emergency-category" className="paper-label">Emergency category</label>
                     <select
-                      id="hospital-select"
-                      value={selectedHospital}
-                      onChange={(event) => setSelectedHospital(event.target.value)}
-                      required
-                      className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[#ccfbf1]"
+                      id="emergency-category"
+                      value={detail.case.emergency_category}
+                      onChange={updateCategory}
+                      disabled={savingCategory}
+                      className="field mt-2 min-h-11 w-full"
                     >
-                      <option value="" disabled>Select a hospital</option>
-                      {hospitals.map((hospital) => (
-                        <option key={hospital.id} value={hospital.id}>{hospital.name}</option>
-                      ))}
+                      <option value="unknown">Not yet classified</option>
+                      <option value="trauma">Trauma / accident</option>
+                      <option value="cardiac">Cardiac</option>
+                      <option value="respiratory">Respiratory</option>
+                      <option value="obstetric">Obstetric</option>
+                      <option value="other">Other</option>
                     </select>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-[var(--perf)] pt-3">
+                    <div>
+                      <p className="paper-label">Ambulance movement</p>
+                      <p className="mt-1 text-[13px] font-semibold capitalize text-[var(--ink)]">
+                        {detail.case.ambulance_status?.replaceAll('_', ' ') ?? 'status unavailable'}
+                      </p>
+                    </div>
                     <button
-                      type="submit"
-                      disabled={!selectedHospital || savingHospital}
-                      className="min-h-12 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      onClick={toggleAmbulanceStatus}
+                      className="border border-[var(--paper-line)] px-3 py-2 text-[11px] font-semibold text-[var(--ink)] transition-colors hover:bg-white"
                     >
-                      {savingHospital ? 'Saving…' : detail.hospital ? 'Update hospital' : 'Select hospital'}
+                      Mark {detail.case.ambulance_status === 'arrived' ? 'en route' : 'arrived'}
                     </button>
                   </div>
-                  {detail.hospital ? <p className="text-xs text-slate-600">Connected to {detail.hospital.name} · hospital staff receive updates in real time.</p> : <p className="text-xs text-amber-800">Select a hospital before sending patient updates.</p>}
-                </form>
+                  <form onSubmit={assignHospital} className="space-y-2 border-t border-dashed border-[var(--perf)] pt-3">
+                    <label htmlFor="hospital-select" className="paper-label">Receiving hospital</label>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <select
+                        id="hospital-select"
+                        value={selectedHospital}
+                        onChange={(event) => setSelectedHospital(event.target.value)}
+                        required
+                        className="field min-h-12 min-w-0 flex-1"
+                      >
+                        <option value="" disabled>Select a hospital</option>
+                        {hospitals.map((hospital) => (
+                          <option key={hospital.id} value={hospital.id}>{hospital.name}</option>
+                        ))}
+                      </select>
+                      <button type="submit" disabled={!selectedHospital || savingHospital} className="btn-ink min-h-12 px-4">
+                        {savingHospital ? 'Saving…' : detail.hospital ? 'Update hospital' : 'Select hospital'}
+                      </button>
+                    </div>
+                    {detail.hospital ? (
+                      <p className="text-[11px] leading-5 text-[var(--paper-muted)]">
+                        Connected to {detail.hospital.name} · hospital staff receive updates in real time.
+                      </p>
+                    ) : (
+                      <p className="text-[11px] leading-5 text-[#8e2d27]">Select a hospital before sending patient updates.</p>
+                    )}
+                  </form>
+                </div>
               </section>
+
               <PatientOverview detail={detail} />
             </div>
 
             <section className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-red-100 text-red-800">
+              <div className="flex items-center gap-3 border-b border-[var(--board-line)] pb-3">
+                <div className="grid h-10 w-10 place-items-center border border-[var(--board-line)] text-[var(--text)]">
                   <Icon name="activity" className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-950">AYU-LINK Emergency Assistant</h2>
-                  <p className="text-sm text-slate-600">Voice-first handoff with the receiving hospital</p>
+                  <h2 className="display text-[20px] text-[var(--text)]">Emergency assistant</h2>
+                  <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">Voice-first handoff with the receiving hospital.</p>
                 </div>
               </div>
-              <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-950 ring-1 ring-inset ring-blue-100">
+              <div className="border border-[var(--board-line)] bg-[var(--board)] px-4 py-3 text-[12px] leading-6 text-[var(--text-muted)]">
                 This assistant supports communication only. It does not diagnose or replace professional medical judgment.
               </div>
               {detail.hospital ? (
-                <CaseMessages caseId={detail.case.id} user={user} canReply replyLabel="Send update" />
+                <CaseMessages
+                  key={detail.case.id}
+                  caseId={detail.case.id}
+                  user={user}
+                  canReply
+                  replyLabel="Send update"
+                  quickConcerns={QUICK_CONCERNS}
+                />
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-9 text-center">
-                  <Icon name="hospital" className="mx-auto h-7 w-7 text-slate-500" />
-                  <p className="mt-3 text-sm font-semibold text-slate-900">Select a hospital to open communication</p>
-                  <p className="mt-1 text-sm text-slate-600">Patient details remain on the ambulance dashboard until a receiving hospital is assigned.</p>
+                <div className="border border-dashed border-[var(--board-line)] bg-[var(--board)] px-5 py-9 text-center">
+                  <Icon name="hospital" className="mx-auto h-7 w-7 text-[var(--text-muted)]" />
+                  <p className="mt-3 text-[13px] font-semibold text-[var(--text)]">Select a hospital to open communication</p>
+                  <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">
+                    Patient details remain on the ambulance dashboard until a receiving hospital is assigned.
+                  </p>
                 </div>
               )}
             </section>
           </section>
 
-          <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 ring-1 ring-inset ring-slate-200">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <Icon name="clock" className="h-4 w-4 text-slate-500" />
+          <section className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--board-line)] pt-3">
+            <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-muted)]">
+              <Icon name="clock" className="h-4 w-4" />
               Case opened {new Date(detail.case.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-[12px] text-[var(--text-muted)]">
               {detail.case.acknowledged_at
                 ? `Hospital acknowledged ${new Date(detail.case.acknowledged_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
                 : 'Awaiting hospital acknowledgement'}

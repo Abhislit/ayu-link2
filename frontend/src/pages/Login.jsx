@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
+import Icon from '../components/Icons'
 import { HOME } from '../roleRoutes'
 
 const DEMO = [
-  { label: 'Driver', email: 'driver@ayu.test' },
-  { label: 'Hospital', email: 'hospital@ayu.test' },
+  { label: 'Ambulance driver', email: 'driver@ayu.test' },
+  { label: 'Ambulance staff', email: 'staff@ayu.test' },
+  { label: 'Hospital staff', email: 'hospital@ayu.test' },
   { label: 'Doctor', email: 'doctor@ayu.test' },
-  { label: 'Admin', email: 'admin@ayu.test' },
+  { label: 'Administrator', email: 'admin@ayu.test' },
 ]
 const DEMO_PASSWORD = 'ayu12345'
 
@@ -35,68 +37,92 @@ export default function Login() {
     }
   }
 
-  function fill(demo) {
-    setEmail(demo.email)
-    setPassword(DEMO_PASSWORD)
+  async function signInAsDemo(demo) {
+    if (busy) return
     setError('')
+    setBusy(true)
+    try {
+      const me = await login(demo.email, DEMO_PASSWORD)
+      navigate(HOME[me.role] ?? '/', { replace: true })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <div className="grid min-h-screen place-items-center px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--primary-ink)]">AYU-LINK</h1>
-        <p className="mt-1 text-sm text-slate-500">Emergency ambulance coordination</p>
-
-        <form onSubmit={submit} className="mt-6 space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
-            Email
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[#ccfbf1]"
-            />
-          </label>
-          <label className="block text-sm font-medium text-slate-700">
-            Password
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[#ccfbf1]"
-            />
-          </label>
-
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="primary-button w-full rounded-lg px-3 py-2 text-sm font-semibold disabled:opacity-60"
-          >
-            {busy ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-
-        <div className="mt-6 border-t border-slate-200 pt-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Demo accounts</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {DEMO.map((demo) => (
-              <button
-                key={demo.email}
-                type="button"
-                onClick={() => fill(demo)}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                {demo.label}
-              </button>
-            ))}
+    <main className="login-page">
+      <div className="login-panel">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="login-brand">
+              <span className="app-brand-mark"><Icon name="activity" /></span>
+              AYU-LINK
+            </h1>
+            <p className="mt-2 text-[13px] leading-5 text-[var(--text-muted)]">Emergency handoff, clearly connected.</p>
           </div>
-          <p className="mt-2 text-xs text-slate-400">Password: {DEMO_PASSWORD}</p>
         </div>
+
+        <section>
+          <h2 className="text-[17px] font-bold text-[var(--ink)]">Sign in</h2>
+          <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">Use your account or open a seeded demo workspace in one step.</p>
+
+          <form onSubmit={submit} className="mt-5 space-y-4">
+              <label className="block">
+                <span className="paper-label">Email</span>
+                <input
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="field mt-1"
+                />
+              </label>
+              <label className="block">
+                <span className="paper-label">Password</span>
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="field mt-1"
+                />
+              </label>
+
+              {error ? (
+                <p role="alert" className="notice notice-alarm">
+                  {error}
+                </p>
+              ) : null}
+
+              <button type="submit" disabled={busy} className="btn-ink w-full">
+                {busy ? 'Signing in…' : 'Sign in'}
+              </button>
+          </form>
+
+          <div className="mt-6 border-t border-[var(--paper-line)] pt-5">
+              <h2 className="text-[14px] font-bold text-[var(--ink)]">Present a demo</h2>
+              <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">Choose a role to enter directly.</p>
+              <div className="demo-account-grid mt-3">
+                {DEMO.map((demo) => (
+                  <button
+                    key={demo.email}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => signInAsDemo(demo)}
+                    className="demo-account"
+                  >
+                    {demo.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-[11px] text-[var(--paper-muted)]">Seeded demo accounts · shared demo password: {DEMO_PASSWORD}</p>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }
