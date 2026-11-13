@@ -1,0 +1,32 @@
+{
+  "name": "AYU-LINK",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "python -m venv .venv && .venv/bin/python -m pip install -r backend/requirements.txt && npm --prefix frontend install",
+  "forwardPorts": [5173, 8000],
+  "portsAttributes": {
+    "5173": {
+      "label": "AYU-LINK",
+      "onAutoForward": "openBrowser"
+    },
+    "8000": {
+      "label": "AYU-LINK API",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "task.allowAutomaticTasks": "on"
+      }
+    }
+  }
+}

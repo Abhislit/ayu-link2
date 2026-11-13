@@ -253,7 +253,7 @@ export default function CaseMessages({
           </>
         ) : (
           <p className="border border-dashed border-[var(--perf)] bg-[var(--paper-band)] px-3 py-2 text-[12px] text-[var(--paper-muted)]">
-            This case is read-only for your role.
+            Messaging is read-only for your role.
           </p>
         )}
       </div>

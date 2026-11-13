@@ -16,7 +16,9 @@ export default function Doctor() {
   const [selectedId, setSelectedId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [closing, setClosing] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   const loadCases = useCallback(async () => {
     try {
@@ -66,6 +68,24 @@ export default function Doctor() {
   const selectedDetail =
     String(detail?.case?.id) === String(selectedId) ? detail : null
   const advancing = useStripAdvance(selectedDetail?.case?.id, selectedDetail?.case?.status)
+  const canCloseSelected = selectedDetail?.case?.status === 'acknowledged'
+    && selectedDetail?.case?.ambulance_status === 'arrived'
+
+  async function closeCase() {
+    if (!selectedId || closing || !canCloseSelected) return
+    setClosing(true)
+    setError('')
+    setNotice('')
+    try {
+      await api(`/api/cases/${selectedId}/close`, { method: 'POST' })
+      await Promise.all([loadCases(), loadDetail(selectedId)])
+      setNotice('Case closed.')
+    } catch (reason) {
+      setError(reason.message || 'Case could not be closed.')
+    } finally {
+      setClosing(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -73,12 +93,13 @@ export default function Doctor() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1>Case overview</h1>
-            <p>Read-only cases assigned to your hospital, with patient details and handoff updates.</p>
+            <p>Review cases assigned to your hospital and close completed handoffs.</p>
           </div>
           <LiveStatus connected={connected} />
         </div>
       </header>
       {error ? <ErrorNotice onDismiss={() => setError('')}>{error}</ErrorNotice> : null}
+      {notice ? <div role="status" className="notice">{notice}</div> : null}
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(17rem,0.72fr)_minmax(0,1.5fr)]">
         <CaseQueue
@@ -127,10 +148,28 @@ export default function Doctor() {
                 </p>
               </div>
             </section>
+            <section className="strip">
+              <div className="strip-body flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-[15px] font-semibold text-[var(--ink)]">Close case</h2>
+                  <p className="mt-1 text-[12px] text-[var(--paper-muted)]">
+                    Requires hospital acknowledgement and ambulance arrival.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeCase}
+                  disabled={closing || selectedDetail.case.status === 'closed' || !canCloseSelected}
+                  className="btn-alarm min-h-11 rounded-lg border px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {selectedDetail.case.status === 'closed' ? 'Case closed' : closing ? 'Saving…' : 'Close case'}
+                </button>
+              </div>
+            </section>
             <PatientOverview detail={selectedDetail} />
             <CaseMessages key={selectedDetail.case.id} caseId={selectedDetail.case.id} user={user} canReply={false} />
             <p className="border border-dashed border-[var(--perf)] bg-[var(--paper-band)] px-3 py-2 text-[12px] leading-5 text-[var(--paper-muted)]">
-              This role can review information and listen to case communications. Only hospital staff can acknowledge or update preparation status.
+              This role can review case information and listen to communications. Closing is available after hospital acknowledgement and ambulance arrival.
             </p>
           </div>
         ) : (

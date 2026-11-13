@@ -39,9 +39,14 @@ def test_ambulance_current_case(client):
     assert res.json()["id"] == case_id
 
 
-def test_admin_cannot_read_case(client):
+def test_admin_can_read_any_case(client):
     case_id = scanned_case_id(client)
-    assert client.get(f"/api/cases/{case_id}", headers=login(client, "admin@ayu.test")).status_code == 403
+    res = client.get(
+        f"/api/cases/{case_id}",
+        headers=login(client, "admin@ayu.test"),
+    )
+    assert res.status_code == 200
+    assert res.json()["patient"]["name"] == "Ravi Kumar"
 
 
 def test_hospital_sees_case_only_after_assignment(client):
@@ -151,6 +156,87 @@ def test_ambulance_status_update_preserves_case_acknowledgement(client):
     )
     assert update.status_code == 200
     assert update.json()["status"] == "acknowledged"
+
+
+def test_doctor_can_close_case_after_acknowledgement_and_ambulance_arrival(client):
+    case_id = scanned_case_id(client)
+    driver = login(client, "driver@ayu.test")
+    client.post(
+        f"/api/cases/{case_id}/hospital",
+        json={"hospital_id": 1},
+        headers=driver,
+    )
+    client.post(
+        f"/api/cases/{case_id}/acknowledge",
+        headers=login(client, "hospital@ayu.test"),
+    )
+    early_close = client.post(
+        f"/api/cases/{case_id}/close",
+        headers=login(client, "doctor@ayu.test"),
+    )
+    assert early_close.status_code == 409
+
+    client.patch(
+        f"/api/cases/{case_id}/ambulance-status",
+        json={"status": "arrived"},
+        headers=driver,
+    )
+
+    res = client.post(
+        f"/api/cases/{case_id}/close",
+        headers=login(client, "doctor@ayu.test"),
+    )
+    assert res.status_code == 200
+    assert res.json()["status"] == "closed"
+
+
+def test_doctor_cannot_close_before_hospital_acknowledgement_and_arrival(client):
+    case_id = scanned_case_id(client)
+    driver = login(client, "driver@ayu.test")
+    client.post(
+        f"/api/cases/{case_id}/hospital",
+        json={"hospital_id": 1},
+        headers=driver,
+    )
+
+    res = client.post(
+        f"/api/cases/{case_id}/close",
+        headers=login(client, "doctor@ayu.test"),
+    )
+    assert res.status_code == 409
+    assert "acknowledge" in res.json()["detail"]
+
+
+def test_admin_can_close_case_without_handoff_prerequisites(client):
+    case_id = scanned_case_id(client)
+    res = client.post(
+        f"/api/cases/{case_id}/close",
+        headers=login(client, "admin@ayu.test"),
+    )
+    assert res.status_code == 200
+    assert res.json()["status"] == "closed"
+
+
+def test_scanning_patient_after_case_closes_opens_a_new_case(client):
+    first_case_id = scanned_case_id(client)
+    closed = client.post(
+        f"/api/cases/{first_case_id}/close",
+        headers=login(client, "admin@ayu.test"),
+    )
+    assert closed.status_code == 200
+
+    next_case_id = scanned_case_id(client)
+    assert next_case_id != first_case_id
+
+
+def test_only_doctor_or_admin_can_close_case(client):
+    case_id = scanned_case_id(client)
+    for email in ("driver@ayu.test", "hospital@ayu.test"):
+        res = client.post(
+            f"/api/cases/{case_id}/close",
+            headers=login(client, email),
+        )
+        assert res.status_code == 403
 
 
 def test_ambulance_sets_emergency_category_for_hospital(client):

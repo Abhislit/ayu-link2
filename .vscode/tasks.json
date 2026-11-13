@@ -14,6 +14,8 @@
         "app.main:app",
         "--app-dir",
         "backend",
+        "--host",
+        "0.0.0.0",
         "--reload"
       ],
       "options": {
@@ -48,7 +50,7 @@
         "dev",
         "--",
         "--host",
-        "127.0.0.1",
+        "0.0.0.0",
         "--port",
         "5173",
         "--strictPort"
@@ -64,7 +66,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "VITE v.* ready",
-          "endsPattern": "http://127\\.0\\.0\\.1:5173/"
+          "endsPattern": "http://.*:5173/"
         }
       },
       "presentation": {
@@ -80,7 +82,10 @@
         "AYU-LINK: Start frontend"
       ],
       "dependsOrder": "parallel",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ]
 }

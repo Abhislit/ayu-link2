@@ -40,7 +40,13 @@ Edit the constants at the top of `rfid_esp32.ino`:
 | `DEVICE_KEY`    | The ambulance's `device_key` (dev seed: `dev-device-key-1`)          |
 | `UID_OVERRIDE`  | Optional literal UID to send instead of the scanned card UID         |
 
-Use the laptop's LAN IP, not `localhost` — `localhost` on the ESP32 is the ESP32.
+Use the laptop's LAN IPv4 address, not `localhost` — `localhost` on the ESP32
+is the ESP32. Start the API listening on the network with
+`--host 0.0.0.0` (the AYU-LINK VS Code task does this), and allow inbound port
+8000 on the computer's private-network firewall if prompted. The ESP32 must
+connect to a 2.4 GHz Wi-Fi network; it cannot connect to 5 GHz Wi-Fi.
+Keep the API and ESP32 on the same trusted LAN, and do not expose this
+development API to the public internet.
 
 `DEVICE_KEY` must match an active ambulance's `device_key`; the backend rejects
 missing or unknown keys with 401.
@@ -57,6 +63,12 @@ Pick one:
   demo patient without touching the database, or
 - Register your real card: set `RfidCard.uid` for the demo patient to the hex UID
   the board prints on the serial monitor.
+
+After a successful scan, the ESP32 receives the patient and case response from
+the API. If the ambulance dashboard is open and signed in for that device's
+ambulance, its live connection loads the new case. Hospital staff see it after
+the crew assigns their hospital. RFID scans authenticate with `DEVICE_KEY`, not
+the driver's browser login.
 
 ## Serial monitor
 

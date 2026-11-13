@@ -5,6 +5,8 @@ React frontend needs the FastAPI backend for patient, hospital, message, and
 live-update data.
 
 1. Use the repository root as the VS Code workspace and check `README.md`.
+   A GitHub URL pasted into Copilot Chat is not a running workspace; open the
+   repository in Codespaces or clone/download and open its folder in VS Code.
 2. If dependencies are missing, create the root `.venv`, install
    `backend/requirements.txt` into it, and run `npm install` in `frontend/`.
    Use `py -3` and `.venv\Scripts\python.exe` on Windows, or `python3` and

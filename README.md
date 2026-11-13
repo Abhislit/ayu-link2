@@ -22,6 +22,14 @@ folder** in VS Code (not the ZIP file and not the `frontend` subfolder). This
 app needs both its API server and its frontend; opening `index.html` directly
 or starting only the frontend leaves the patient and hospital data unavailable.
 
+Pasting the repository URL into Copilot Chat alone does not download or run the
+app. For a ready-to-run Copilot workspace, open **[AYU-LINK in GitHub
+Codespaces](https://github.com/codespaces/new?repo=Abhislit/ayu-link2)**. It
+installs the dependencies, starts both servers when the workspace opens, and
+opens the forwarded frontend. Alternatively, download the ZIP, open its
+extracted folder in VS Code, install the dependencies below, then choose
+**Terminal → Run Task… → AYU-LINK: Start development servers**.
+
 ### First-time setup
 
 Install Python 3.11+ and Node.js 20.19+ or 22.12+, then open a VS Code terminal
@@ -54,13 +62,13 @@ run these commands in two VS Code terminals from the project root:
 **Windows PowerShell, API:**
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --reload
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --reload
 ```
 
 **macOS / Linux, API:**
 
 ```bash
-.venv/bin/python -m uvicorn app.main:app --app-dir backend --reload
+.venv/bin/python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --reload
 ```
 
 **All platforms, frontend (second terminal):**
@@ -85,8 +93,8 @@ demo accounts on startup. Password for each account is `ayu12345`:
 | Ambulance driver | `driver@ayu.test` |
 | Ambulance staff | `staff@ayu.test` |
 | Hospital staff | `hospital@ayu.test` |
-| Doctor (read-only) | `doctor@ayu.test` |
-| Administrator | `admin@ayu.test` |
+| Doctor (close after acknowledged arrival) | `doctor@ayu.test` |
+| Administrator (manage all cases) | `admin@ayu.test` |
 
 ## Firmware demo reader
 
@@ -98,11 +106,19 @@ it is non-empty, the board sends that literal string instead of the scanned UID.
 This makes the seeded demo patient reachable without creating a fake UID-to-card
 mapping in the firmware or database.
 
-For the demo environment, set `DEVICE_KEY` to `dev-device-key-1` and `API_BASE`
-to the backend URL reachable from the ESP32, such as `http://192.168.1.50:8000`.
-Flash the board, open the serial monitor, and watch for `Card UID ...` plus the
-HTTP response body. See [firmware/rfid_esp32/README.md](./firmware/rfid_esp32/README.md)
-for the wiring, flashing, and serial-monitor instructions.
+For the hardware demo, run the API on the same computer and trusted Wi-Fi as
+the ESP32. The VS Code API task binds to `0.0.0.0`; for manual startup, include
+`--host 0.0.0.0`. Set the firmware's `API_BASE` to that computer's LAN IPv4
+address, such as `http://192.168.1.50:8000` (not `localhost`), and
+`DEVICE_KEY` to `dev-device-key-1`. Allow inbound port 8000 through the private
+network firewall if prompted. For the seeded demo patient, set `UID_OVERRIDE`
+to `"CARD-1001"`; otherwise register the RFID card's real UID. The ESP32 must
+use a 2.4 GHz Wi-Fi network. Codespaces is suitable for the software demo, but
+use a local computer for the ESP32 because the board cannot authenticate to a
+Codespaces forwarded port. Flash the board, open the serial monitor, and watch
+for `Card UID ...`, `HTTP 200`, and the patient response body. See
+[firmware/rfid_esp32/README.md](./firmware/rfid_esp32/README.md) for wiring and
+flashing instructions.
 
 ## Demonstrate the emergency handoff
 
@@ -118,8 +134,11 @@ for the wiring, flashing, and serial-monitor instructions.
    recording, reply, acknowledge the emergency, and update preparation status.
    The ambulance crew can mark the vehicle as arrived; its movement status is
    shown separately from case acknowledgement.
-6. Sign in as `doctor@ayu.test` to review the same hospital cases without
-   write controls.
+6. Sign in as `doctor@ayu.test` to review cases for City General. A doctor can
+   close an assigned case only after the hospital acknowledges it and the
+   ambulance is marked arrived.
+7. Sign in as `admin@ayu.test` to see cases across all ambulances and hospitals.
+   Admins can update case workflow fields or override the closure requirements.
 
 The browser recorder requires localhost or HTTPS and microphone permission.
 The authenticated simulation endpoint is enabled only in `AYU_ENV=dev` or

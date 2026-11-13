@@ -114,3 +114,54 @@ def test_admin_overview_counts_match_seed(client):
         "patients": 1,
         "cases": 0,
     }
+
+
+def test_admin_can_list_read_and_update_any_case(client):
+    case_id = scanned_case(client)
+    admin = login(client, "admin@ayu.test")
+
+    cases = client.get("/api/admin/cases", headers=admin)
+    assert cases.status_code == 200
+    assert any(row["id"] == case_id and row["patient"]["name"] == "Ravi Kumar" for row in cases.json())
+
+    detail = client.get(f"/api/admin/cases/{case_id}", headers=admin)
+    assert detail.status_code == 200
+    assert detail.json()["medical_record"]["summary"]
+
+    update = client.patch(
+        f"/api/admin/cases/{case_id}",
+        json={
+            "hospital_id": 2,
+            "status": "hospital_selected",
+            "priority": "critical",
+            "emergency_category": "respiratory",
+            "ambulance_status": "arrived",
+            "prep_status": "ready",
+        },
+        headers=admin,
+    )
+    assert update.status_code == 200
+    assert update.json()["hospital_id"] == 2
+    assert update.json()["status"] == "hospital_selected"
+    assert update.json()["priority"] == "critical"
+    assert update.json()["emergency_category"] == "respiratory"
+    assert update.json()["ambulance_status"] == "arrived"
+    assert update.json()["prep_status"] == "ready"
+
+
+def test_admin_case_updates_validate_hospital_and_fields(client):
+    case_id = scanned_case(client)
+    admin = login(client, "admin@ayu.test")
+
+    invalid_hospital = client.patch(
+        f"/api/admin/cases/{case_id}",
+        json={"hospital_id": 999},
+        headers=admin,
+    )
+    invalid_status = client.patch(
+        f"/api/admin/cases/{case_id}",
+        json={"status": "not-a-status"},
+        headers=admin,
+    )
+    assert invalid_hospital.status_code == 404
+    assert invalid_status.status_code == 422

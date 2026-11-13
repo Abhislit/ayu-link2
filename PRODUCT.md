@@ -11,8 +11,8 @@ web
 Ambulance drivers and authorized ambulance staff identify patients and coordinate
 their transport to a selected hospital. Hospital staff receive emergency updates,
 listen to voice notes, reply, acknowledge communications, and update preparation
-status. Doctors review cases for their hospital. Administrators manage platform
-directories and view aggregate counts.
+status. Doctors review cases for their hospital. Administrators review and
+update any emergency case and view platform directories and aggregate counts.
 
 ## Product Purpose
 
@@ -40,7 +40,10 @@ only identifiers; patient data stays in the backend.
   remains compatible with an authenticated RFID device.
 - Only authenticated ambulance roles can use the Emergency Assistant and send
   ambulance communications. Hospital staff and doctors are limited to their
-  hospital's assigned cases; doctors have read-only access.
+  hospital's assigned cases. Doctors can close an acknowledged case after the
+  ambulance is marked arrived; administrators can review and update any case
+  and override those closure prerequisites. Administrator access does not
+  reveal password hashes or device keys.
 - Voice communication uses browser microphone permission, preview, upload, and
   authenticated playback. Hospital acknowledgement and preparation updates are
   recorded against the case.
