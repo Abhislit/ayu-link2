@@ -129,6 +129,7 @@ export default function Hospital() {
           onSelect={setSelectedId}
           loading={loading}
           emptyDescription="Cases appear here after an ambulance selects this hospital."
+          layout="cards"
         />
 
         {detailLoading ? (

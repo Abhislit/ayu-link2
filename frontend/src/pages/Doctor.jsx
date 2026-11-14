@@ -110,6 +110,7 @@ export default function Doctor() {
           onSelect={setSelectedId}
           loading={loading}
           emptyTitle="No cases assigned to this hospital"
+          layout="cards"
         />
 
         {detailLoading ? (
