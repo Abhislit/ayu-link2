@@ -93,6 +93,7 @@ export default function AdminCaseManager({ cases, hospitals, onRefresh }) {
           onSelect={setActiveId}
           loading={false}
           emptyTitle="No emergency cases"
+          layout="cards"
         />
         {selectedId && !selectedDetail && !error ? (
           <div className="space-y-4" aria-label="Loading selected case">

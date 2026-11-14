@@ -39,6 +39,41 @@ def test_ambulance_current_case(client):
     assert res.json()["id"] == case_id
 
 
+def test_ambulance_case_list_returns_all_active_cases_for_its_ambulance(client):
+    first_case_id = scanned_case_id(client)
+    from app.database import SessionLocal
+    from app.models import Patient, RfidCard
+
+    with SessionLocal() as db:
+        patient = Patient(name="Demo Patient", age=32, sex="F", blood_group="A+")
+        db.add(patient)
+        db.flush()
+        db.add(RfidCard(uid="CARD-1002", patient_id=patient.id))
+        db.commit()
+
+    second_case_id = client.post(
+        "/api/rfid/scans", json={"uid": "CARD-1002"}, headers=DEVICE_KEY
+    ).json()["case"]["id"]
+    other_ambulance_case_id = client.post(
+        "/api/rfid/scans",
+        json={"uid": "CARD-1002"},
+        headers={"X-Device-Key": "dev-device-key-2"},
+    ).json()["case"]["id"]
+
+    res = client.get("/api/ambulance/cases", headers=login(client, "driver@ayu.test"))
+    assert res.status_code == 200
+    assert [row["id"] for row in res.json()] == [second_case_id, first_case_id]
+    assert [row["patient"]["name"] for row in res.json()] == ["Demo Patient", "Ravi Kumar"]
+    assert other_ambulance_case_id not in [row["id"] for row in res.json()]
+
+
+def test_ambulance_case_list_is_scoped_to_ambulance_role(client):
+    assert client.get("/api/ambulance/cases").status_code == 401
+    assert client.get(
+        "/api/ambulance/cases", headers=login(client, "hospital@ayu.test")
+    ).status_code == 403
+
+
 def test_admin_can_read_any_case(client):
     case_id = scanned_case_id(client)
     res = client.get(

@@ -62,6 +62,26 @@ def current_case(
     return case_public(case)
 
 
+@router.get("/ambulance/cases")
+def ambulance_cases(
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*AMBULANCE_ROLES)),
+):
+    cases = (
+        db.query(EmergencyCase)
+        .filter(
+            EmergencyCase.ambulance_id == user.ambulance_id,
+            EmergencyCase.status.in_(ACTIVE_CASE_STATUSES),
+        )
+        .order_by(EmergencyCase.id.desc())
+        .all()
+    )
+    return [
+        {**case_public(case), "patient": patient_public(case.patient)}
+        for case in cases
+    ]
+
+
 @router.get("/cases/{case_id}")
 def read_case(
     case_id: int,
