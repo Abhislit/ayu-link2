@@ -45,22 +45,23 @@ the LCD clock, so the MFRC522 reset wire must use GPIO27 as shown above.
 
 ## Configuration
 
-Real credentials belong in `secrets.h` next to the sketch. It is gitignored, so
-the repo only ever shows placeholder values:
+Everything lives in `rfid_esp32.ino`. Edit the block at the top of the file:
 
 ```c
-#define AYU_WIFI_SSID "your-ssid"
-#define AYU_WIFI_PASSWORD "your-password"
-#define AYU_API_BASE "http://192.168.1.50:8000"
-#define AYU_DEVICE_KEY "dev-device-key-1"
+const char *WIFI_SSID = "YOUR_WIFI_SSID";
+const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char *API_BASE = "http://192.168.1.50:8000";
+const char *DEVICE_KEY = "dev-device-key-1";
+const char *UID_OVERRIDE = "";
 ```
 
-Without that file the sketch compiles with placeholders and will not join WiFi.
+Do not commit real WiFi credentials to a public repository — keep them in your
+local copy of the sketch.
 
-`AYU_API_BASE` may be `http://` on a LAN or `https://` for a deployed API.
-HTTPS is verified against the pinned root in `certs.h` (ISRG Root X1, Let's
+`API_BASE` may be `http://` on a LAN or `https://` for a deployed API. HTTPS is
+verified against the pinned `ROOT_CA` in the same file (ISRG Root X1, Let's
 Encrypt), and the board syncs NTP time before its first TLS call. If you deploy
-behind a host with a different root CA, replace `AYU_ROOT_CA` in `certs.h`.
+behind a host with a different root CA, replace `ROOT_CA`.
 
 The constants below describe what each value means:
 
