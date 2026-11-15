@@ -16,15 +16,30 @@ MFRC522 modules are 3.3 V only. Connecting one to 5 V will damage it.
 | SCK         | GPIO18    | SPI clock                      |
 | MOSI        | GPIO23    | SPI data to reader             |
 | MISO        | GPIO19    | SPI data from reader           |
-| RST         | GPIO22    | Reset (`RST_PIN`)              |
+| RST         | GPIO27    | Reset (`RST_PIN`)              |
 | 3.3V        | 3V3       | 3.3 V supply, never 5 V        |
 | GND         | GND       | Common ground                  |
 | IRQ         | -         | Not used                       |
 
+For a 16x2 LCD with an I2C backpack:
+
+| LCD pin | ESP32 pin | Notes |
+| ------- | --------- | ----- |
+| GND     | GND       | Common ground |
+| VCC     | 3V3       | Only if the LCD backpack supports 3.3 V |
+| SDA     | GPIO21    | I2C data |
+| SCL     | GPIO22    | I2C clock |
+
+Many LCD backpacks require 5 V. ESP32 pins are not 5 V tolerant: if the
+backpack needs 5 V power, use a bidirectional I2C logic-level shifter on SDA
+and SCL. Do not connect 5 V I2C signals directly to the ESP32. GPIO22 is now
+the LCD clock, so the MFRC522 reset wire must use GPIO27 as shown above.
+
 ## Install and flash
 
 1. Install the Arduino IDE and the ESP32 board support.
-2. Install the **MFRC522** library by *GithubCommunity* (Library Manager).
+2. Install the **MFRC522** library by *GithubCommunity*, **hd44780** by *Bill
+   Perry*, and **ArduinoJson** by *Benoit Blanchon* in Library Manager.
 3. Select board **ESP32 Dev Module** and the correct serial port.
 4. Open `rfid_esp32.ino`, set the constants below, then upload.
 
@@ -50,6 +65,13 @@ development API to the public internet.
 
 `DEVICE_KEY` must match an active ambulance's `device_key`; the backend rejects
 missing or unknown keys with 401.
+
+After a successful scan, the LCD shows the patient's name on line 1 and age,
+blood group, and case number on line 2. WiFi, unknown-card, authentication, and
+API errors are shown on the LCD as well. The `hd44780` driver automatically
+detects the common I2C backpack address and pin mapping. If the screen stays
+blank, check LCD power and wiring, then run its `I2CexpDiag` example from the
+Arduino IDE to diagnose the backpack.
 
 ## Card UIDs and the demo card
 
@@ -77,7 +99,7 @@ Open the serial monitor at **115200 baud**. The board prints:
 - `AYU-LINK RFID reader ready` once setup completes,
 - the assigned IP after joining WiFi, or `WiFi connection timed out`,
 - `Card UID <uid>` for each scan,
-- `HTTP <code>` and the response body for each request, and
+- `HTTP <code>` and a short success/error status for each request, and
 - `Retrying scan` followed by one retry when the request fails.
 
 Repeated reads of the same card within 3 seconds are ignored.
