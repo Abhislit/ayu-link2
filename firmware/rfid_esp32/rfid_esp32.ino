@@ -7,10 +7,20 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char *WIFI_SSID = "YOUR_WIFI_SSID";
-const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-const char *API_BASE = "http://192.168.1.50:8000";
-const char *DEVICE_KEY = "dev-device-key-1";
+// Real credentials live in secrets.h, which is gitignored.
+#if __has_include("secrets.h")
+#include "secrets.h"
+#else
+#define AYU_WIFI_SSID "YOUR_WIFI_SSID"
+#define AYU_WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define AYU_API_BASE "http://192.168.1.50:8000"
+#define AYU_DEVICE_KEY "dev-device-key-1"
+#endif
+
+const char *WIFI_SSID = AYU_WIFI_SSID;
+const char *WIFI_PASSWORD = AYU_WIFI_PASSWORD;
+const char *API_BASE = AYU_API_BASE;
+const char *DEVICE_KEY = AYU_DEVICE_KEY;
 const char *UID_OVERRIDE = "";
 
 const uint8_t SS_PIN = 5;

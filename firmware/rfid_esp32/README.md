@@ -45,7 +45,19 @@ the LCD clock, so the MFRC522 reset wire must use GPIO27 as shown above.
 
 ## Configuration
 
-Edit the constants at the top of `rfid_esp32.ino`:
+Real credentials belong in `secrets.h` next to the sketch. It is gitignored, so
+the repo only ever shows placeholder values:
+
+```c
+#define AYU_WIFI_SSID "your-ssid"
+#define AYU_WIFI_PASSWORD "your-password"
+#define AYU_API_BASE "http://192.168.1.50:8000"
+#define AYU_DEVICE_KEY "dev-device-key-1"
+```
+
+Without that file the sketch compiles with placeholders and will not join WiFi.
+
+The constants below describe what each value means:
 
 | Constant        | Meaning                                                              |
 | --------------- | -------------------------------------------------------------------- |
