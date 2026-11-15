@@ -16,12 +16,14 @@ const char *UID_OVERRIDE = "";
 const uint8_t SS_PIN = 5;
 const uint8_t RST_PIN = 27;
 const unsigned long DUPLICATE_WINDOW_MS = 3000;
+const unsigned long HEARTBEAT_INTERVAL_MS = 15000;
 const unsigned long WIFI_TIMEOUT_MS = 20000;
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 hd44780_I2Cexp lcd;
 String lastUid;
 unsigned long lastUidAt = 0;
+unsigned long lastHeartbeatAt = 0;
 bool lcdReady = false;
 
 void showLine(uint8_t row, const String &text) {
@@ -75,6 +77,23 @@ void connectWifi() {
     Serial.println("WiFi connection timed out");
     showDisplay("WiFi unavailable", "Check settings");
   }
+}
+
+void sendHeartbeat() {
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+  HTTPClient http;
+  if (!http.begin(String(API_BASE) + "/api/rfid/heartbeat")) {
+    Serial.println("Invalid heartbeat URL");
+    return;
+  }
+  http.setTimeout(4000);
+  http.addHeader("X-Device-Key", DEVICE_KEY);
+  int code = http.POST("");
+  http.end();
+  Serial.print("RFID heartbeat HTTP ");
+  Serial.println(code);
 }
 
 int postScan(const String &uid) {
@@ -161,6 +180,11 @@ void setup() {
 void loop() {
   if (WiFi.status() != WL_CONNECTED) {
     connectWifi();
+  }
+  if (WiFi.status() == WL_CONNECTED &&
+      (lastHeartbeatAt == 0 || millis() - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS)) {
+    lastHeartbeatAt = millis();
+    sendHeartbeat();
   }
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) {
     delay(50);

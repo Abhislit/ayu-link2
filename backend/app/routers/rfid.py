@@ -1,4 +1,5 @@
 import secrets
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -15,6 +16,7 @@ from app.serializers import case_public, patient_public, record_public
 router = APIRouter(prefix="/api/rfid", tags=["rfid"])
 
 ACTIVE_CASE_STATUSES = ("open", "hospital_selected", "acknowledged")
+RFID_ONLINE_WINDOW = timedelta(seconds=45)
 
 
 class ScanBody(BaseModel):
@@ -86,6 +88,36 @@ def scan(
 ):
     ambulance = device_ambulance(db, x_device_key)
     return scan_patient(db, ambulance, body.uid)
+
+
+@router.post("/heartbeat")
+def heartbeat(
+    x_device_key: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    ambulance = device_ambulance(db, x_device_key)
+    ambulance.rfid_last_seen = datetime.now(timezone.utc)
+    db.commit()
+    return {"status": "ok"}
+
+
+@router.get("/status")
+def reader_status(
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*AMBULANCE_ROLES)),
+):
+    ambulance = db.get(Ambulance, user.ambulance_id)
+    if ambulance is None or not ambulance.is_active:
+        raise HTTPException(status_code=403, detail="No active ambulance is assigned")
+
+    last_seen = ambulance.rfid_last_seen
+    if last_seen is not None and last_seen.tzinfo is None:
+        last_seen = last_seen.replace(tzinfo=timezone.utc)
+    connected = (
+        last_seen is not None
+        and datetime.now(timezone.utc) - last_seen <= RFID_ONLINE_WINDOW
+    )
+    return {"connected": connected}
 
 
 @router.post("/demo-scans")

@@ -43,6 +43,34 @@ def test_physical_card_uids_map_to_distinct_patients(client):
     assert len(patient_ids) == len(RFID_PATIENTS)
 
 
+def test_reader_status_tracks_authenticated_heartbeats(client):
+    from datetime import datetime, timedelta, timezone
+
+    from app.database import SessionLocal
+    from app.models import Ambulance
+
+    token = client.post(
+        "/api/auth/login", json={"email": "driver@ayu.test", "password": "ayu12345"}
+    ).json()["token"]
+    auth = {"Authorization": f"Bearer {token}"}
+
+    assert client.get("/api/rfid/status", headers=auth).json() == {"connected": False}
+    heartbeat = client.post("/api/rfid/heartbeat", headers=DEVICE_KEY)
+    assert heartbeat.status_code == 200
+    assert client.get("/api/rfid/status", headers=auth).json() == {"connected": True}
+
+    with SessionLocal() as db:
+        ambulance = db.query(Ambulance).filter_by(id=1).one()
+        ambulance.rfid_last_seen = datetime.now(timezone.utc) - timedelta(seconds=46)
+        db.commit()
+    assert client.get("/api/rfid/status", headers=auth).json() == {"connected": False}
+
+
+def test_reader_heartbeat_requires_device_key(client):
+    res = client.post("/api/rfid/heartbeat")
+    assert res.status_code == 401
+
+
 def test_inactive_card_is_404(client):
     from app.database import SessionLocal
     from app.models import Patient, RfidCard

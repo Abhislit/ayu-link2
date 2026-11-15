@@ -28,6 +28,7 @@ class Ambulance(Base):
     device_key: Mapped[str] = mapped_column(String(120), unique=True)
     hospital_id: Mapped[int | None] = mapped_column(ForeignKey("hospitals.id"), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    rfid_last_seen: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class User(Base):

@@ -73,6 +73,10 @@ detects the common I2C backpack address and pin mapping. If the screen stays
 blank, check LCD power and wiring, then run its `I2CexpDiag` example from the
 Arduino IDE to diagnose the backpack.
 
+The reader sends an authenticated heartbeat every 15 seconds. The ambulance
+dashboard reports it as connected while a heartbeat has arrived within the
+last 45 seconds; the demo scan controls are hidden while the reader is online.
+
 ## Card UIDs and the demo card
 
 By default the firmware sends the scanned card UID as uppercase hex with no
@@ -99,6 +103,7 @@ Open the serial monitor at **115200 baud**. The board prints:
 - `AYU-LINK RFID reader ready` once setup completes,
 - the assigned IP after joining WiFi, or `WiFi connection timed out`,
 - `Card UID <uid>` for each scan,
+- `RFID heartbeat HTTP <code>` while the reader reports its connection,
 - `HTTP <code>` and a short success/error status for each request, and
 - `Retrying scan` followed by one retry when the request fails.
 

@@ -56,6 +56,9 @@ export default function Ambulance() {
   const [loading, setLoading] = useState(true)
   const [detailLoading, setDetailLoading] = useState(false)
   const [scanning, setScanning] = useState(false)
+  const [readerOnline, setReaderOnline] = useState(false)
+  const [readerStatusLoaded, setReaderStatusLoaded] = useState(false)
+  const [readerStatusError, setReaderStatusError] = useState('')
   const [savingHospital, setSavingHospital] = useState(false)
   const [savingCategory, setSavingCategory] = useState(false)
   const [error, setError] = useState('')
@@ -143,9 +146,38 @@ export default function Ambulance() {
     }
   }, [loadCaseDetail])
 
+  useEffect(() => {
+    let active = true
+    let timer
+
+    async function pollReaderStatus() {
+      try {
+        const status = await api('/api/rfid/status')
+        if (active) {
+          setReaderOnline(status.connected)
+          setReaderStatusLoaded(true)
+          setReaderStatusError('')
+        }
+      } catch (reason) {
+        if (active) {
+          setReaderStatusLoaded(true)
+          setReaderStatusError(reason.message || 'Could not check RFID reader status.')
+        }
+      } finally {
+        if (active) timer = window.setTimeout(pollReaderStatus, 10000)
+      }
+    }
+
+    pollReaderStatus()
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [])
+
   async function simulateScan(event) {
     event.preventDefault()
-    if (!uid.trim() || scanning) return
+    if (!uid.trim() || scanning || readerOnline) return
     setScanning(true)
     setError('')
     setNotice('')
@@ -253,31 +285,50 @@ export default function Ambulance() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="text-[15px] font-semibold text-[var(--text)]">Patient identification</h2>
-                <p className="mt-1 text-[12px] text-[var(--text-muted)]">RFID scan · demo scanner</p>
+                <p className="mt-1 text-[12px] text-[var(--text-muted)]">
+                  {readerOnline ? 'Physical RFID reader connected' : 'RFID scan · demo scanner'}
+                </p>
               </div>
               <span className="st text-[var(--text-muted)]">Authenticated · {user.name}</span>
             </div>
-            <form onSubmit={simulateScan} className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <label className="sr-only" htmlFor="rfid-uid">Demo patient card</label>
-              <select
-                id="rfid-uid"
-                value={uid}
-                onChange={(event) => setUid(event.target.value)}
-                className="field-dark min-h-12 min-w-0 flex-1"
-              >
-                {DEMO_RFID_CARDS.map(([cardUid, patientName]) => (
-                  <option key={cardUid} value={cardUid}>{patientName} · {cardUid}</option>
-                ))}
-              </select>
-              <button type="submit" disabled={!uid.trim() || scanning} className="btn min-h-12 px-5">
-                <Icon name="radio" className="h-4 w-4" />
-                {scanning ? 'Reading card…' : 'Simulate RFID scan'}
-              </button>
-            </form>
-            <p className="mt-2 text-[11px] leading-5 text-[var(--text-muted)]">
-              Choose a different patient for each simulation. Each scan creates or reopens that patient’s active case.
-              The production RFID device API keeps its own device-key authentication.
-            </p>
+            {!readerStatusLoaded ? (
+              <p role="status" className="mt-4 text-sm text-[var(--text-muted)]">
+                Checking RFID reader connection…
+              </p>
+            ) : readerOnline ? (
+              <p role="status" className="mt-4 rounded-lg border border-[var(--board-line)] bg-[var(--paper-band)] px-3 py-2 text-sm text-[var(--text)]">
+                Reader is online. Scan a physical card; the simulator is hidden while the reader is connected.
+              </p>
+            ) : (
+              <>
+                <form onSubmit={simulateScan} className="mt-4 flex flex-col gap-2 sm:flex-row">
+                  <label className="sr-only" htmlFor="rfid-uid">Demo patient card</label>
+                  <select
+                    id="rfid-uid"
+                    value={uid}
+                    onChange={(event) => setUid(event.target.value)}
+                    className="field-dark min-h-12 min-w-0 flex-1"
+                  >
+                    {DEMO_RFID_CARDS.map(([cardUid, patientName]) => (
+                      <option key={cardUid} value={cardUid}>{patientName} · {cardUid}</option>
+                    ))}
+                  </select>
+                  <button type="submit" disabled={!uid.trim() || scanning} className="btn min-h-12 px-5">
+                    <Icon name="radio" className="h-4 w-4" />
+                    {scanning ? 'Reading card…' : 'Simulate RFID scan'}
+                  </button>
+                </form>
+                <p className="mt-2 text-[11px] leading-5 text-[var(--text-muted)]">
+                  Choose a patient for the demo scan. The production RFID device API uses its own device-key authentication.
+                </p>
+              </>
+            )}
+            {readerStatusError ? (
+              <p role="status" className="mt-2 text-[11px] leading-5 text-[var(--alarm)]">
+                RFID status check failed: {readerStatusError}
+                {readerOnline ? ' The simulator remains hidden based on the last online report.' : ' The simulator remains available.'}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -290,7 +341,7 @@ export default function Ambulance() {
         onSelect={selectCase}
         loading={false}
         emptyTitle="No active patient cases"
-        emptyDescription="Simulate an RFID scan to create the first patient card."
+        emptyDescription="Scan a physical RFID card or use the demo scanner to create the first patient case."
         layout="cards"
       />
 
@@ -302,7 +353,7 @@ export default function Ambulance() {
       ) : !selectedDetail ? (
         <EmptyCase
           title="Ready for patient identification"
-          description="Scan a demo RFID card to securely load the patient summary and create or reopen an emergency case."
+          description="Scan a physical RFID card or use the demo scanner to securely load a patient and create or reopen an emergency case."
         />
       ) : (
         <>

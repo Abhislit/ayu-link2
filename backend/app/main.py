@@ -19,6 +19,14 @@ from app.seed import seed_demo, seed_rfid_patients
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    ambulance_columns = {
+        column["name"] for column in inspect(engine).get_columns("ambulances")
+    }
+    if "rfid_last_seen" not in ambulance_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE ambulances ADD COLUMN rfid_last_seen DATETIME")
+            )
     case_columns = {
         column["name"] for column in inspect(engine).get_columns("emergency_cases")
     }
