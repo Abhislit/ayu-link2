@@ -6,9 +6,13 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
-    # The ESP32 firmware talks to this service over https. Put the URL Render
-    # assigns (https://<name>.onrender.com) into API_BASE at the top of
-    # firmware/rfid_esp32/rfid_esp32.ino.
+    # The demo runs on https://ayu-link2-1.onrender.com, configured by hand in
+    # the Render dashboard rather than through this blueprint. Keep
+    # AYU_CORS_ORIGIN on that service set to the same value as below, or the
+    # Socket.IO handshake fails and live updates never arrive.
+    #
+    # The ESP32 firmware talks to that host over https; API_BASE at the top of
+    # firmware/rfid_esp32/rfid_esp32.ino already points there.
     #
     # AYU_ENV=dev seeds the demo users, patients and CARD-1001 on first boot,
     # which is what the demo needs. It also means the seed passwords
