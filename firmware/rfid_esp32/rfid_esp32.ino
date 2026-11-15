@@ -6,6 +6,10 @@
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
+#include <time.h>
+
+#include "certs.h"
 
 // Real credentials live in secrets.h, which is gitignored.
 #if __has_include("secrets.h")
@@ -35,6 +39,32 @@ String lastUid;
 unsigned long lastUidAt = 0;
 unsigned long lastHeartbeatAt = 0;
 bool lcdReady = false;
+
+// HTTPS needs a verified clock before the CA check can pass.
+static WiFiClientSecure tlsClient;
+static WiFiClient plainClient;
+static bool tlsReady = false;
+
+static void syncClock() {
+  if (!String(API_BASE).startsWith("https://") || time(nullptr) > 1700000000) {
+    return;
+  }
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  for (int i = 0; i < 20 && time(nullptr) < 1700000000; i++) {
+    delay(250);
+  }
+}
+
+static WiFiClient &httpClient(const String &url) {
+  if (!url.startsWith("https://")) {
+    return plainClient;
+  }
+  if (!tlsReady) {
+    tlsClient.setCACert(AYU_ROOT_CA);
+    tlsReady = true;
+  }
+  return tlsClient;
+}
 
 void showLine(uint8_t row, const String &text) {
   if (!lcdReady) {
@@ -82,6 +112,7 @@ void connectWifi() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("WiFi connected, IP ");
     Serial.println(WiFi.localIP());
+    syncClock();
     showDisplay("WiFi connected", "Scan RFID card");
   } else {
     Serial.println("WiFi connection timed out");
@@ -94,11 +125,12 @@ void sendHeartbeat() {
     return;
   }
   HTTPClient http;
-  if (!http.begin(String(API_BASE) + "/api/rfid/heartbeat")) {
+  String url = String(API_BASE) + "/api/rfid/heartbeat";
+  if (!http.begin(httpClient(url), url)) {
     Serial.println("Invalid heartbeat URL");
     return;
   }
-  http.setTimeout(4000);
+  http.setTimeout(8000);
   http.addHeader("X-Device-Key", DEVICE_KEY);
   int code = http.POST("");
   http.end();
@@ -113,7 +145,8 @@ int postScan(const String &uid) {
     return -1;
   }
   HTTPClient http;
-  if (!http.begin(String(API_BASE) + "/api/rfid/scans")) {
+  String url = String(API_BASE) + "/api/rfid/scans";
+  if (!http.begin(httpClient(url), url)) {
     Serial.println("Invalid API URL");
     showDisplay("Invalid API URL", "Check settings");
     return -1;

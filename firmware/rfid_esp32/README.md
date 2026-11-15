@@ -57,6 +57,11 @@ the repo only ever shows placeholder values:
 
 Without that file the sketch compiles with placeholders and will not join WiFi.
 
+`AYU_API_BASE` may be `http://` on a LAN or `https://` for a deployed API.
+HTTPS is verified against the pinned root in `certs.h` (ISRG Root X1, Let's
+Encrypt), and the board syncs NTP time before its first TLS call. If you deploy
+behind a host with a different root CA, replace `AYU_ROOT_CA` in `certs.h`.
+
 The constants below describe what each value means:
 
 | Constant        | Meaning                                                              |
