@@ -25,6 +25,24 @@ def test_unknown_uid_is_404(client):
     assert res.status_code == 404
 
 
+def test_physical_card_uids_map_to_distinct_patients(client):
+    from app.database import SessionLocal
+    from app.seed import RFID_PATIENTS, seed_rfid_patients
+
+    with SessionLocal() as db:
+        seed_rfid_patients(db)
+
+    patient_ids = set()
+    for uid, expected_name, *_ in RFID_PATIENTS:
+        res = client.post("/api/rfid/scans", json={"uid": uid}, headers=DEVICE_KEY)
+        assert res.status_code == 200
+        patient = res.json()["patient"]
+        assert patient["name"] == expected_name
+        patient_ids.add(patient["id"])
+
+    assert len(patient_ids) == len(RFID_PATIENTS)
+
+
 def test_inactive_card_is_404(client):
     from app.database import SessionLocal
     from app.models import Patient, RfidCard
