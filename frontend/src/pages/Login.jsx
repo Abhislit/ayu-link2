@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { api } from '../api'
 import { useAuth } from '../auth'
 import Icon from '../components/Icons'
 import { HOME } from '../roleRoutes'
@@ -12,6 +13,7 @@ const DEMO = [
   { label: 'Administrator', email: 'admin@ayu.test' },
 ]
 const DEMO_PASSWORD = 'ayu12345'
+const RESET_KEY = import.meta.env.VITE_DEMO_RESET_KEY
 
 export default function Login() {
   const { user, login } = useAuth()
@@ -19,6 +21,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
 
   if (user) return <Navigate to={HOME[user.role] ?? '/'} replace />
@@ -44,6 +47,27 @@ export default function Login() {
     try {
       const me = await login(demo.email, DEMO_PASSWORD)
       navigate(HOME[me.role] ?? '/', { replace: true })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function resetDemo() {
+    if (busy || !RESET_KEY) return
+    if (!window.confirm('Reset the demo? Every case, message and account goes back to the shipped seed data.')) {
+      return
+    }
+    setError('')
+    setNotice('')
+    setBusy(true)
+    try {
+      const result = await api('/api/demo/reset', {
+        method: 'POST',
+        headers: { 'X-Demo-Reset-Key': RESET_KEY },
+      })
+      setNotice(`Demo reset — ${result.patients} patients, ${result.users} users restored.`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -97,6 +121,11 @@ export default function Login() {
                   {error}
                 </p>
               ) : null}
+              {notice ? (
+                <p role="status" className="notice">
+                  {notice}
+                </p>
+              ) : null}
 
               <button type="submit" disabled={busy} className="btn-ink w-full">
                 {busy ? 'Signing in…' : 'Sign in'}
@@ -120,6 +149,16 @@ export default function Login() {
                 ))}
               </div>
               <p className="mt-3 text-[11px] text-[var(--paper-muted)]">Seeded demo accounts · shared demo password: {DEMO_PASSWORD}</p>
+              {RESET_KEY ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={resetDemo}
+                  className="demo-account mt-3"
+                >
+                  Reset demo data
+                </button>
+              ) : null}
           </div>
         </section>
       </div>

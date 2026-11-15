@@ -12,7 +12,7 @@ from sqlalchemy import inspect, text
 from app import realtime
 from app.config import CORS_ORIGINS, ENV
 from app.database import Base, SessionLocal, engine
-from app.routers import admin, auth, cases, doctor, hospital, hospitals, messages, rfid, voice
+from app.routers import admin, auth, cases, demo, doctor, hospital, hospitals, messages, rfid, voice
 from app.seed import seed_demo, seed_rfid_patients
 
 
@@ -91,6 +91,7 @@ app.include_router(voice.router)
 app.include_router(hospital.router)
 app.include_router(doctor.router)
 app.include_router(admin.router)
+app.include_router(demo.router)
 
 # socketio_path=None: the mount already strips "/socket.io", so route the
 # remaining scope to Socket.IO and let it dispatch on the Engine.IO query.

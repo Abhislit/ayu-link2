@@ -5,6 +5,7 @@ os.environ["AYU_ENV"] = "test"
 os.environ["AYU_DATABASE_URL"] = "sqlite:///" + os.path.join(tempfile.mkdtemp(), "test.db")
 os.environ["AYU_SECRET"] = "test-secret"
 os.environ["AYU_STORAGE_DIR"] = tempfile.mkdtemp()
+os.environ["AYU_DEMO_RESET_KEY"] = "test-reset-key"
 
 import pytest
 from fastapi.testclient import TestClient

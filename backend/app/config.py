@@ -21,3 +21,4 @@ STORAGE_DIR = Path(
     os.getenv("AYU_STORAGE_DIR", str(Path(__file__).resolve().parent.parent / "storage"))
 )
 TOKEN_TTL = timedelta(hours=12)
+DEMO_RESET_KEY = os.getenv("AYU_DEMO_RESET_KEY", "")
