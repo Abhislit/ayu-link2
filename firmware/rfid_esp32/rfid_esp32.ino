@@ -10,8 +10,8 @@
 #include <time.h>
 
 // --- Configuration: edit these, everything else can stay as is -------------
-const char *WIFI_SSID = "YOUR_WIFI_SSID";
-const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char *WIFI_SSID = "DPSR";
+const char *WIFI_PASSWORD = "12345678";
 const char *API_BASE = "https://ayu-link.onrender.com";
 const char *DEVICE_KEY = "dev-device-key-1";
 const char *UID_OVERRIDE = "";
