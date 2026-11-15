@@ -59,41 +59,10 @@ Do not commit real WiFi credentials to a public repository — keep them in your
 local copy of the sketch.
 
 `API_BASE` may be `http://` on a LAN or `https://` for a deployed API. HTTPS is
-verified against the pinned `ROOT_CA` in the same file (ISRG Root X1, Let's
-Encrypt), and the board syncs NTP time before its first TLS call. If you deploy
-behind a host with a different root CA, replace `ROOT_CA`.
-
-The constants below describe what each value means:
-
-| Constant        | Meaning                                                              |
-| --------------- | -------------------------------------------------------------------- |
-| `WIFI_SSID`     | WiFi network name the ESP32 joins                                    |
-| `WIFI_PASSWORD` | WiFi password                                                        |
-| `API_BASE`      | Backend base URL reachable from the ESP32, e.g. `http://192.168.1.50:8000` |
-| `DEVICE_KEY`    | The ambulance's `device_key` (dev seed: `dev-device-key-1`)          |
-| `UID_OVERRIDE`  | Optional literal UID to send instead of the scanned card UID         |
-
-Use the laptop's LAN IPv4 address, not `localhost` — `localhost` on the ESP32
-is the ESP32. Start the API listening on the network with
-`--host 0.0.0.0` (the AYU-LINK VS Code task does this), and allow inbound port
-8000 on the computer's private-network firewall if prompted. The ESP32 must
-connect to a 2.4 GHz Wi-Fi network; it cannot connect to 5 GHz Wi-Fi.
-Keep the API and ESP32 on the same trusted LAN, and do not expose this
-development API to the public internet.
-
-`DEVICE_KEY` must match an active ambulance's `device_key`; the backend rejects
-missing or unknown keys with 401.
-
-After a successful scan, the LCD shows the patient's name on line 1 and age,
-blood group, and case number on line 2. WiFi, unknown-card, authentication, and
-API errors are shown on the LCD as well. The `hd44780` driver automatically
-detects the common I2C backpack address and pin mapping. If the screen stays
-blank, check LCD power and wiring, then run its `I2CexpDiag` example from the
-Arduino IDE to diagnose the backpack.
-
-The reader sends an authenticated heartbeat every 15 seconds. The ambulance
-dashboard reports it as connected while a heartbeat has arrived within the
-last 45 seconds; the demo scan controls are hidden while the reader is online.
+verified against the pinned `ROOT_CA` in the same file — GTS Root R4, the Google
+Trust Services root that signs Render's `onrender.com` certificate. The board
+syncs NTP time before its first TLS call. If you deploy behind a host with a
+different root CA, replace `ROOT_CA`.
 
 ## Card UIDs and the demo card
 
