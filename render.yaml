@@ -20,6 +20,10 @@ services:
     envVars:
       - key: AYU_ENV
         value: dev
+      # Socket.IO rejects handshakes whose Origin is not listed here, so the
+      # deployed host must appear or live updates never connect.
+      - key: AYU_CORS_ORIGIN
+        value: https://ayu-link2-1.onrender.com,http://localhost:5173,http://127.0.0.1:5173
       - key: AYU_SECRET
         generateValue: true
       - key: AYU_DATABASE_URL
