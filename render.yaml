@@ -6,6 +6,17 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
+    # The ESP32 firmware talks to this service over https. Put the URL Render
+    # assigns (https://<name>.onrender.com) into API_BASE at the top of
+    # firmware/rfid_esp32/rfid_esp32.ino.
+    #
+    # AYU_ENV=dev seeds the demo users, patients and CARD-1001 on first boot,
+    # which is what the demo needs. It also means the seed passwords
+    # (ayu12345) are live, so do not use this configuration with real data.
+    #
+    # SQLite on an ephemeral filesystem is wiped on every deploy: card UIDs
+    # registered by hand disappear. Attach a disk or move to Postgres if the
+    # demo needs to survive redeploys.
     envVars:
       - key: AYU_ENV
         value: dev
