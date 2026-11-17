@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useAuth } from '../auth'
-import Icon from '../components/Icons'
 import { HOME } from '../roleRoutes'
 
 const DEMO = [
@@ -81,7 +80,7 @@ export default function Login() {
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
             <h1 className="login-brand">
-              <span className="app-brand-mark"><Icon name="activity" /></span>
+              <img className="app-brand-mark" src="/swarakshak-mark.png" alt="" />
               SWARAKSHAK
             </h1>
             <p className="mt-2 text-[13px] leading-5 text-[var(--text-muted)]">Emergency handoff, clearly connected.</p>

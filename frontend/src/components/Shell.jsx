@@ -36,7 +36,7 @@ export default function Shell() {
     <div className="app-shell">
       <aside className="app-rail">
         <div className="app-brand">
-          <span className="app-brand-mark"><Icon name="activity" /></span>
+          <img className="app-brand-mark" src="/swarakshak-mark.png" alt="" />
           <span>SWARAKSHAK</span>
         </div>
         <p className="nav-caption">Workspaces</p>
@@ -57,7 +57,7 @@ export default function Shell() {
         <header className="mobile-header">
           <div className="mobile-topbar">
             <div className="app-brand">
-              <span className="app-brand-mark"><Icon name="activity" /></span>
+              <img className="app-brand-mark" src="/swarakshak-mark.png" alt="" />
               <span>SWARAKSHAK</span>
             </div>
             <button type="button" onClick={signOut} className="mobile-signout">Sign out</button>
