@@ -5,7 +5,16 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Ambulance, CaseEvent, EmergencyCase, Hospital, Patient, User, now
+from app.models import (
+    Ambulance,
+    CaseEvent,
+    EmergencyCase,
+    Hospital,
+    Message,
+    Patient,
+    User,
+    now,
+)
 from app.realtime import emit_case
 from app.routers.cases import case_detail
 from app.security import require_roles
@@ -33,6 +42,16 @@ def overview(db: Session = Depends(get_db), user=Depends(admin_only)):
         "patients": db.query(Patient).count(),
         "cases": db.query(EmergencyCase).count(),
     }
+
+
+@router.delete("/cases")
+def clear_cases(db: Session = Depends(get_db), user=Depends(admin_only)):
+    """Delete every case with its messages and history. Patients and users stay."""
+    messages = db.query(Message).delete(synchronize_session=False)
+    events = db.query(CaseEvent).delete(synchronize_session=False)
+    cases = db.query(EmergencyCase).delete(synchronize_session=False)
+    db.commit()
+    return {"cases": cases, "messages": messages, "events": events}
 
 
 @router.get("/users")

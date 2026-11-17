@@ -26,7 +26,9 @@ export default function Admin() {
   const [directories, setDirectories] = useState({})
   const [activeSection, setActiveSection] = useState('cases')
   const [loading, setLoading] = useState(true)
+  const [clearing, setClearing] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -48,6 +50,23 @@ export default function Admin() {
     load()
   }, [load])
 
+  async function clearCases() {
+    if (clearing) return
+    if (!window.confirm('Remove every emergency case? Their messages and history are deleted too. This cannot be undone.')) return
+    setClearing(true)
+    setError('')
+    setNotice('')
+    try {
+      const result = await api('/api/admin/cases', { method: 'DELETE' })
+      await load()
+      setNotice(`Removed ${result.cases} case${result.cases === 1 ? '' : 's'}.`)
+    } catch (reason) {
+      setError(reason.message || 'Cases could not be removed.')
+    } finally {
+      setClearing(false)
+    }
+  }
+
   const active = SECTIONS.find((section) => section.key === activeSection) ?? SECTIONS[0]
   const rows = directories[active.key] ?? []
 
@@ -59,17 +78,28 @@ export default function Admin() {
             <h1 className="display text-3xl text-[var(--ink)]">Platform overview</h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-600">Review platform totals and manage every emergency case across hospitals and ambulances.</p>
           </div>
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="primary-button disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={clearCases}
+              disabled={clearing || loading || (overview?.cases ?? 0) === 0}
+              className="btn-alarm rounded-lg border px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {clearing ? 'Removing…' : 'Remove all cases'}
+            </button>
+            <button
+              type="button"
+              onClick={load}
+              disabled={loading}
+              className="primary-button disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Refreshing…' : 'Refresh'}
+            </button>
+          </div>
         </div>
       </header>
       {error ? <ErrorNotice onDismiss={() => setError('')}>{error}</ErrorNotice> : null}
+      {notice ? <div role="status" className="notice">{notice}</div> : null}
       <div className="sr-only" aria-live="polite">
         {directories.cases?.length ?? 0} cases available to administrators
       </div>
