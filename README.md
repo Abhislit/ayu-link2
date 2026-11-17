@@ -105,7 +105,7 @@ demo accounts on startup. Password for each account is `ayu12345`:
 | Ambulance driver | `driver@ayu.test` |
 | Ambulance staff | `staff@ayu.test` |
 | Hospital staff | `hospital@ayu.test` |
-| Doctor (close after acknowledged arrival) | `doctor@ayu.test` |
+| Doctor (reviews cases, closes handoffs) | `doctor@ayu.test` |
 | Administrator (manage all cases) | `admin@ayu.test` |
 
 ## Firmware demo reader
@@ -149,10 +149,10 @@ flashing instructions.
    The ambulance crew can mark the vehicle as arrived; its movement status is
    shown separately from case acknowledgement.
 6. Sign in as `doctor@ayu.test` to review cases for City General. A doctor can
-   close an assigned case only after the hospital acknowledges it and the
-   ambulance is marked arrived.
+   close an assigned case at any point, without waiting for the hospital to
+   acknowledge it or the ambulance to be marked arrived.
 7. Sign in as `admin@ayu.test` to see cases across all ambulances and hospitals.
-   Admins can update case workflow fields or override the closure requirements.
+   Admins can update case workflow fields or reopen a closed case.
 
 The browser recorder requires localhost or HTTPS and microphone permission.
 The authenticated simulation endpoint is enabled only in `AYU_ENV=dev` or

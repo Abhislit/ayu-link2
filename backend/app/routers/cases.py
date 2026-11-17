@@ -169,13 +169,6 @@ def close_case(
     case = get_case_for_user(db, case_id, user)
     if case.status == "closed":
         raise HTTPException(status_code=409, detail="Case is already closed")
-    if user.role == "doctor" and (
-        case.status != "acknowledged" or case.ambulance_status != "arrived"
-    ):
-        raise HTTPException(
-            status_code=409,
-            detail="The hospital must acknowledge the case and the ambulance must arrive before a doctor can close it",
-        )
 
     case.status = "closed"
     db.add(

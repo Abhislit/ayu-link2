@@ -193,53 +193,21 @@ def test_ambulance_status_update_preserves_case_acknowledgement(client):
     assert update.json()["status"] == "acknowledged"
 
 
-def test_doctor_can_close_case_after_acknowledgement_and_ambulance_arrival(client):
+def test_doctor_can_close_case_without_handoff_prerequisites(client):
     case_id = scanned_case_id(client)
-    driver = login(client, "driver@ayu.test")
+    # the case still has to belong to the doctor's hospital, but neither
+    # acknowledgement nor an arrival update is required
     client.post(
         f"/api/cases/{case_id}/hospital",
         json={"hospital_id": 1},
-        headers=driver,
+        headers=login(client, "driver@ayu.test"),
     )
-    client.post(
-        f"/api/cases/{case_id}/acknowledge",
-        headers=login(client, "hospital@ayu.test"),
-    )
-    early_close = client.post(
-        f"/api/cases/{case_id}/close",
-        headers=login(client, "doctor@ayu.test"),
-    )
-    assert early_close.status_code == 409
-
-    client.patch(
-        f"/api/cases/{case_id}/ambulance-status",
-        json={"status": "arrived"},
-        headers=driver,
-    )
-
     res = client.post(
         f"/api/cases/{case_id}/close",
         headers=login(client, "doctor@ayu.test"),
     )
     assert res.status_code == 200
     assert res.json()["status"] == "closed"
-
-
-def test_doctor_cannot_close_before_hospital_acknowledgement_and_arrival(client):
-    case_id = scanned_case_id(client)
-    driver = login(client, "driver@ayu.test")
-    client.post(
-        f"/api/cases/{case_id}/hospital",
-        json={"hospital_id": 1},
-        headers=driver,
-    )
-
-    res = client.post(
-        f"/api/cases/{case_id}/close",
-        headers=login(client, "doctor@ayu.test"),
-    )
-    assert res.status_code == 409
-    assert "acknowledge" in res.json()["detail"]
 
 
 def test_admin_can_close_case_without_handoff_prerequisites(client):

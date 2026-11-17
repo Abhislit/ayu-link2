@@ -68,8 +68,7 @@ export default function Doctor() {
   const selectedDetail =
     String(detail?.case?.id) === String(selectedId) ? detail : null
   const advancing = useStripAdvance(selectedDetail?.case?.id, selectedDetail?.case?.status)
-  const canCloseSelected = selectedDetail?.case?.status === 'acknowledged'
-    && selectedDetail?.case?.ambulance_status === 'arrived'
+  const canCloseSelected = selectedDetail?.case?.status !== 'closed'
 
   async function closeCase() {
     if (!selectedId || closing || !canCloseSelected) return
@@ -154,13 +153,13 @@ export default function Doctor() {
                 <div>
                   <h2 className="text-[15px] font-semibold text-[var(--ink)]">Close case</h2>
                   <p className="mt-1 text-[12px] text-[var(--paper-muted)]">
-                    Requires hospital acknowledgement and ambulance arrival.
+                    Closes the handoff for this case at any stage.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={closeCase}
-                  disabled={closing || selectedDetail.case.status === 'closed' || !canCloseSelected}
+                  disabled={closing || !canCloseSelected}
                   className="btn-alarm min-h-11 rounded-lg border px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {selectedDetail.case.status === 'closed' ? 'Case closed' : closing ? 'Saving…' : 'Close case'}
