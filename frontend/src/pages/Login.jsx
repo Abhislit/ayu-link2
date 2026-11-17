@@ -82,7 +82,7 @@ export default function Login() {
           <div>
             <h1 className="login-brand">
               <span className="app-brand-mark"><Icon name="activity" /></span>
-              AYU-LINK
+              SWARAKSHAK
             </h1>
             <p className="mt-2 text-[13px] leading-5 text-[var(--text-muted)]">Emergency handoff, clearly connected.</p>
           </div>

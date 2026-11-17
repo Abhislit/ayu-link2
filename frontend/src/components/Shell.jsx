@@ -37,7 +37,7 @@ export default function Shell() {
       <aside className="app-rail">
         <div className="app-brand">
           <span className="app-brand-mark"><Icon name="activity" /></span>
-          <span>AYU-LINK</span>
+          <span>SWARAKSHAK</span>
         </div>
         <p className="nav-caption">Workspaces</p>
         <nav aria-label="Primary navigation" className="workspace-nav">
@@ -58,7 +58,7 @@ export default function Shell() {
           <div className="mobile-topbar">
             <div className="app-brand">
               <span className="app-brand-mark"><Icon name="activity" /></span>
-              <span>AYU-LINK</span>
+              <span>SWARAKSHAK</span>
             </div>
             <button type="button" onClick={signOut} className="mobile-signout">Sign out</button>
           </div>
